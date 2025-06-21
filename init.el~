@@ -1,7 +1,6 @@
 ;;; init.el --- Summary ;;my-emacs -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;;; Code:
-(setq user-emacs-directory "~/.emacs.d/")
 (setq user-full-name "Christoph-Alexander Hermanns"
       user-real-login-name "Christoph-Alexander Hermanns"
       user-login-name "shoshin"
@@ -533,26 +532,11 @@
   )
 (use-package org-modern
   :straight t
-  :after org
-  :config
-  (global-org-modern-mode 1)
   )
-
-(use-package org-modern-indent
-  :straight (:package org-modern-indent
-                      :type built-in
-                      :local-repo "org-modern-indent"
-                      :files ("org-modern-indent.el")
-                      )
-  :load-path "~/.emacs.d/elisp/org-modern-indent"
-  :after (org org-modern)
-  :config
-  (add-hook 'org-mode-hook #'org-modern-indent-mode 90)
-)
 
 (use-package org
   :straight t
-  :after engrave-faces
+  :after '(engrave-faces org-modern)
   :hook ((org-mode . visual-line-mode)
          (org-mode . org-num-mode))
   :init
@@ -560,147 +544,23 @@
 
 
   :config
-  (setq org-directory "~/org")
-  (setq org-agenda-files (list "~/org/agenda"))
-  (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
-  (setq org-todo-keyword-faces
-        '(
-          ("TODO" . (:foreground "GoldenRod" :weight bold))
-          ("IN-PROGRESS"  (:foreground "DeepPink" :weight bold))
-          ("BLOCKED" . (:foreground "Cyan" :weight bold))
-          ("DONE" . (:foreground "LimeGreen" :weight bold))
-          ("OBE" . (:foreground "DarkOrange" :weight bold))
-          ("WONT-DO" . (:foreground "Cyan" :weight bold))
-          )
+  (setq org-directory "~/org"
         )
-  (setq org-tag-alist '(
-                        ;; Ticket types
-                        (:startgroup . nil)
-                        ("@bug" . ?b)
-                        ("@feature" . ?u)
-                        ("@spike" . ?j)
-                        (:endgroup . nil)
-
-                        ;; Ticket flags
-                        ("@write_future_ticket" . ?w)
-                        ("@emergency" . ?e)
-                        ("@research" . ?r)
-
-                        ;; Meeting types
-                        (:startgroup nil)
-                        ("big_sprint_review" . ?i)
-                        ("cents_sprint_retro" . ?n)
-                        ("ai" . ?a)
-                        (:endgroup . nil)
-
-                        ;; Code TODO tags
-                        ("QA" . ?q)
-                        ("backend" . ?k)
-                        ("broken_code" . ?c)
-                        ("frontend" . ?f)
-
-                        ;; Special tags
-                        ("CRITICAL" . ?x)
-                        ("obstacle" . ?o)
-
-                        ;; Meetings tags
-                        ("HR" . ?h)
-                        ("general" . ?l)
-                        ("meeting" . ?m)
-                        ("misc" . ?z)
-                        ("planning" . ?p)
-
-                        ;; Work Log Tags
-                        ("accomplishment" . ?a)
-                        ))
-
-
-   :general
+  (global-org-modern-mode)
+  (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\||txt\\)$" . org-mode))
+  ;;(setq org-agenda-files '("~/org/agenda"
+  ;;                               "~/org/dailes"
+  ;;                               "~/org/todos"
+  ;;                               "~/org/dates.org"))
+  :general
   (:states 'normal
            (hc/leader
              :infix "o"
              ""  '(nil :which-key "org-mode")
-             "a" '("agenda" . org-agenda)
+             "a" '("Agenda" . org-agenda)
              "l" '("org-store a link" . org-store-link)
              ))
   )
-
-(use-package org-super-agenda
-              :straight t
-              :defer t
-              :config
-              (setq org-agenda-custom-commands
-                    '(
-                      ("j" "Overwatch"
-                       (
-                        (agenda ""
-                                (
-                                 (org-agenda-remove-tags t)
-                                 (org-agenda-span 7)
-                                 )
-                                )
-                        (alltodo ""
-                                 (
-                                  ;; Remove tags to make the view cleaner
-                                  (org-agenda-remove-tags t)
-                                  (org-agenda-prefix-format " %t %s")
-                                  (org-agenda-overriding-header "CURRENT STATUS")
-
-                                  ;; Define the super agenda groups (sorts by oder)
-                                  (org-super-agenda-groups
-                                   '(
-                                     ;; Filter where tag is CRITICAL
-                                     (:name "Critical Tasks"
-                                            :tag "CRITICAL"
-                                            :order 0
-                                            )
-                                     ;; Filter where TODO is IN-PROGRESS
-                                     (:name "Currently Working"
-                                            :todo "IN-PROGRESS"
-                                            :order 1
-                                            )
-                                     ;; Filter where TODO state is BLOCKED  - or obstacle!
-                                     (:name "Problems & Blockers"
-                                            :todo "BLOCKED"
-                                            :tag "obstacle"
-                                            :order 3
-                                            )
-                                     ;; Filter where tag is @write_future_ticker
-                                     (:name "Tickets to Create"
-                                            :tag "@write_future_ticket"
-                                            :order 4
-                                            )
-                                     ;; Filter where tag is @research
-                                     (:name "Research Required"
-                                            :tag "@research"
-                                            :order 7
-                                            )
-                                     ;; Filter where tag is meeting and priority A  (only want TODOs from meetings)
-                                     (:name "Meeting Action Items"
-                                            :and (:tag "meeting" :priority "A")
-                                            :order 8
-                                            )
-                                     ;; Filter where state is TODO and the priority is A and the tag is not meeting
-                                     (:name "Other Important Items"
-                                            :and (:todo "TODO" :priority "A" :not (:tag "meeting"))
-                                            )
-                                     ;; Filter where the priority is C or less (supports future lower priorities)
-                                     (:name "Non Critical"
-                                            :priority <= "C"
-                                            :order 11
-                                            )
-                                     ;; Filter where TODO state is VERIFYING
-                                     (:name "Currently Being Verified"
-                                            :todo "VERIFYING"
-                                            :order 20
-                                            )
-                                     )
-                                   )
-                                  )
-                                 )
-                        ))
-                      ))
-)
 
 (use-package org-gcal
   :straight t
