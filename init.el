@@ -561,8 +561,31 @@
 
   :config
   (setq org-directory "~/org")
+  ;;(defvar my-latex-font-size "12pt" "Default font size for LaTeX exports.")
+  (setq org-latex-compiler "xelatex")
   (setq org-agenda-files (list "~/org/agenda"))
   (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+  (setq org-capture-templates
+        '(
+          ("g" "General To-Do"
+           entry (file+headline "~/org/agenda/todos.org" "General Tasks")
+           "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:\n \n:Created: %U\nSCHEDULED: %^{Scheduled to begin}t DEADLINE: %^{DEADLINE}T\n %?"
+           :empty-lines 0)
+        ("c" "Code To-Do"
+          entry (file+headline "~/org/todos.org" "Code Related Tasks")
+          "* TODO [#B] %?\n:Created: %T\n%i\n%a\nProposed Solution: ")
+          ("m" "Meeting"
+          entry (file+datetree "~/org/agenda/meetings.org")
+          "* %? :meeting:%^g \n:Created: %T\n** Attendees\n*** \n** Notes\n** Action Items\n*** TODO [#A] "
+          :tree-type week
+          :clock-in t
+          :clock-resume t
+          :empty-lines 0)
+        ))
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "PLANNING(p)" "IN-PROGRESS(i@/!)" "BLOCKED(@b!)" "|" "DONE(d!)" "OBE(o@!)" "WONT-DO(w@/!)")
+          ))
+
   (setq org-todo-keyword-faces
         '(
           ("TODO" . (:foreground "GoldenRod" :weight bold))
@@ -576,28 +599,31 @@
   (setq org-tag-alist '(
                         ;; Ticket types
                         (:startgroup . nil)
+                        ("@private" . ?p)
+                        (:startgroup . nil)
                         ("@bug" . ?b)
                         ("@feature" . ?u)
-                        ("@spike" . ?j)
+                        ("@spike" . ?k)
                         (:endgroup . nil)
 
                         ;; Ticket flags
-                        ("@write_future_ticket" . ?w)
+                        ("@scheduled" . ?s)
                         ("@emergency" . ?e)
                         ("@research" . ?r)
 
                         ;; Meeting types
-                        (:startgroup nil)
-                        ("big_sprint_review" . ?i)
-                        ("cents_sprint_retro" . ?n)
+                        (:startgroup . nil)
+                        ("general" . ?b)
+                        ("big_sprint_review" . ?b)
+                        ("normal_sprint_review" . ?n)
                         ("ai" . ?a)
                         (:endgroup . nil)
 
                         ;; Code TODO tags
                         ("QA" . ?q)
-                        ("backend" . ?k)
+                        ("foundation" . ?k)
                         ("broken_code" . ?c)
-                        ("frontend" . ?f)
+                        ("performance" . ?f)
 
                         ;; Special tags
                         ("CRITICAL" . ?x)
@@ -608,12 +634,10 @@
                         ("general" . ?l)
                         ("meeting" . ?m)
                         ("misc" . ?z)
-                        ("planning" . ?p)
 
                         ;; Work Log Tags
                         ("accomplishment" . ?a)
                         ))
-
 
    :general
   (:states 'normal
@@ -627,11 +651,10 @@
 
 (use-package org-super-agenda
               :straight t
-              :defer t
               :config
               (setq org-agenda-custom-commands
                     '(
-                      ("j" "Overwatch"
+                      ("o" "Overwatch"
                        (
                         (agenda ""
                                 (
@@ -641,10 +664,43 @@
                                 )
                         (alltodo ""
                                  (
+                                  (org-agenda-remove-tags t)
+                                  (org-agenda-prefix-format "%t %s")
+                                  (org-agenda-overriding-header "PRIVATE CURRENT")
+                                  (org-super-agenda-groups
+                                   '(
+                                     (:name "Personal"
+                                            :tag "CRITICAL"
+                                            :order 0
+                                      )
+                                     (:name "Currently Working"
+                                            :todo "IN-PROGRESS"
+                                            :order 1
+                                            )
+                                     (:name "Scheduled"
+                                            :todo "PLANNING"
+                                            :tag "obstacle"
+                                            :order 2
+                                            )
+                                     (:name "On the way"
+                                            :todo "IDEA"
+                                            :tag "evolving"
+                                            :order 3
+                                            )
+                                     (:name "General Backlog"
+                                            :and (:todo "TODO" :priority "B")
+                                            :order 5
+                                      )
+                                     )
+                                   )
+                                  )
+                                 )
+                        (alltodo ""
+                                 (
                                   ;; Remove tags to make the view cleaner
                                   (org-agenda-remove-tags t)
                                   (org-agenda-prefix-format " %t %s")
-                                  (org-agenda-overriding-header "CURRENT STATUS")
+                                  (org-agenda-overriding-header "WORK CURRENT")
 
                                   ;; Define the super agenda groups (sorts by oder)
                                   (org-super-agenda-groups
@@ -666,8 +722,8 @@
                                             :order 3
                                             )
                                      ;; Filter where tag is @write_future_ticker
-                                     (:name "Tickets to Create"
-                                            :tag "@write_future_ticket"
+                                     (:name "Scheduled and Planning"
+                                            :tag "@scheduled"
                                             :order 4
                                             )
                                      ;; Filter where tag is @research
@@ -694,6 +750,39 @@
                                             :todo "VERIFYING"
                                             :order 20
                                             )
+                                     )
+                                   )
+                                  )
+                                 )
+                        (alltodo ""
+                                 (
+                                  (org-agenda-remove-tags t)
+                                  (org-agenda-prefix-format "%t %s")
+                                  (org-agenda-overriding-header "ACTIVITY CURRENT")
+                                  (org-super-agenda-groups
+                                   '(
+                                     (:name "On the Top"
+                                            :tag "CRITICAL"
+                                            :order 0
+                                      )
+                                     (:name "Currently Processed"
+                                            :todo "IN-PROGRESS"
+                                            :order 1
+                                            )
+                                     (:name "On Schedule"
+                                            :todo "PLANNING"
+                                            :tag "obstacle"
+                                            :order 2
+                                            )
+                                     (:name "On the way"
+                                            :todo "IDEA"
+                                            :tag "evolving"
+                                            :order 3
+                                            )
+                                     (:name "General Backlog"
+                                            :and (:todo "TODO" :priority "B")
+                                            :order 5
+                                      )
                                      )
                                    )
                                   )
