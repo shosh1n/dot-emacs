@@ -66,7 +66,7 @@
   (defconst *sys/linux*
     (eq system-type 'gnu/linux)
     "Are we running on a GNU/LINUX system?")
-
+(global-auto-revert-mode t)
 (setq epg-gpg-program
       (executable-find "gpg"))
 
@@ -548,6 +548,18 @@
   :after (org org-modern)
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90)
+  )
+
+(use-package valign
+  :straight (:package valign
+                      :type built-in
+                      :local-repo "valign"
+                      :files ("valign.el")
+                      )
+  :load-path "~/.emacs.d/elisp/valign"
+  :after (org)
+  :config
+  (add-hook 'org-mode-hook #'valign-mode)
 )
 
 (use-package org
@@ -569,7 +581,7 @@
         '(
           ("g" "General To-Do"
            entry (file+headline "~/org/agenda/todos.org" "General Tasks")
-           "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:\n \n:Created: %U\nSCHEDULED: %^{Scheduled to begin}t DEADLINE: %^{DEADLINE}T\n %?"
+           "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:%^g\n:Created: %U\nSCHEDULED:%^{Scheduled to begin}t DEADLINE:%^{DEADLINE}T\n%?"
            :empty-lines 0)
         ("c" "Code To-Do"
           entry (file+headline "~/org/todos.org" "Code Related Tasks")
@@ -597,9 +609,14 @@
           )
         )
   (setq org-tag-alist '(
-                        ;; Ticket types
+                        ;; my selections
                         (:startgroup . nil)
-                        ("@private" . ?p)
+                        ("private" . ?p)
+                        ("work" . ?w)
+                        ("activity" . ?a)
+                        (:endgroup . nil)
+
+                        ;; ticket types
                         (:startgroup . nil)
                         ("@bug" . ?b)
                         ("@feature" . ?u)
@@ -613,15 +630,15 @@
 
                         ;; Meeting types
                         (:startgroup . nil)
-                        ("general" . ?b)
-                        ("big_sprint_review" . ?b)
+                        ("general" . ?g)
+                        ("big_sprint_review" . ?r)
                         ("normal_sprint_review" . ?n)
                         ("ai" . ?a)
                         (:endgroup . nil)
 
                         ;; Code TODO tags
                         ("QA" . ?q)
-                        ("foundation" . ?k)
+                        ("foundation" . ?f)
                         ("broken_code" . ?c)
                         ("performance" . ?f)
 
@@ -636,7 +653,7 @@
                         ("misc" . ?z)
 
                         ;; Work Log Tags
-                        ("accomplishment" . ?a)
+                        ("accomplishment" . ?y)
                         ))
 
    :general
@@ -646,6 +663,7 @@
              ""  '(nil :which-key "org-mode")
              "a" '("agenda" . org-agenda)
              "l" '("org-store a link" . org-store-link)
+             "c" '("capture some tasks..." . org-capture)
              ))
   )
 
@@ -662,9 +680,9 @@
                                  (org-agenda-span 7)
                                  )
                                 )
-                        (alltodo ""
+                        (tags-todo "+private"
                                  (
-                                  (org-agenda-remove-tags t)
+                                  (org-agenda-remove-tags nil)
                                   (org-agenda-prefix-format "%t %s")
                                   (org-agenda-overriding-header "PRIVATE CURRENT")
                                   (org-super-agenda-groups
@@ -689,16 +707,16 @@
                                             )
                                      (:name "General Backlog"
                                             :and (:todo "TODO" :priority "B")
-                                            :order 5
+                                            :order 4
                                       )
                                      )
                                    )
                                   )
                                  )
-                        (alltodo ""
+                        (tags-todo "+work"
                                  (
                                   ;; Remove tags to make the view cleaner
-                                  (org-agenda-remove-tags t)
+                                  (org-agenda-remove-tags nil)
                                   (org-agenda-prefix-format " %t %s")
                                   (org-agenda-overriding-header "WORK CURRENT")
 
@@ -719,7 +737,7 @@
                                      (:name "Problems & Blockers"
                                             :todo "BLOCKED"
                                             :tag "obstacle"
-                                            :order 3
+                                            :order 2
                                             )
                                      ;; Filter where tag is @write_future_ticker
                                      (:name "Scheduled and Planning"
@@ -729,34 +747,35 @@
                                      ;; Filter where tag is @research
                                      (:name "Research Required"
                                             :tag "@research"
-                                            :order 7
+                                            :order 5
                                             )
                                      ;; Filter where tag is meeting and priority A  (only want TODOs from meetings)
                                      (:name "Meeting Action Items"
                                             :and (:tag "meeting" :priority "A")
-                                            :order 8
+                                            :order 6
                                             )
                                      ;; Filter where state is TODO and the priority is A and the tag is not meeting
                                      (:name "Other Important Items"
-                                            :and (:todo "TODO" :priority "A" :not (:tag "meeting"))
-                                            )
+                                            :and (:todo "TODO" :priority "A" :not (:tag "meeting" )
+                                            ))
                                      ;; Filter where the priority is C or less (supports future lower priorities)
                                      (:name "Non Critical"
                                             :priority <= "C"
-                                            :order 11
+                                            :order 7
                                             )
                                      ;; Filter where TODO state is VERIFYING
                                      (:name "Currently Being Verified"
                                             :todo "VERIFYING"
-                                            :order 20
+                                            :order 8
                                             )
                                      )
                                    )
                                   )
-                                 )
-                        (alltodo ""
+                                  )
+
+                        (tags-todo "+activity"
                                  (
-                                  (org-agenda-remove-tags t)
+                                  (org-agenda-remove-tags nil)
                                   (org-agenda-prefix-format "%t %s")
                                   (org-agenda-overriding-header "ACTIVITY CURRENT")
                                   (org-super-agenda-groups
@@ -780,8 +799,8 @@
                                             :order 3
                                             )
                                      (:name "General Backlog"
-                                            :and (:todo "TODO" :priority "B")
-                                            :order 5
+                                            :and (:todo "TODO" :priority ("B" "A"))
+                                            :order 4
                                       )
                                      )
                                    )
