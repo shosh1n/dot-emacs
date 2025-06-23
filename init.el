@@ -572,6 +572,9 @@
 
 
   :config
+  (setq org-agenda-skip-scheduled-if-deadline-is-shown t
+      org-agenda-skip-timestamp-if-deadline-is-shown t
+      org-agenda-skip-deadline-if-done t)
   (setq org-directory "~/org")
   ;;(defvar my-latex-font-size "12pt" "Default font size for LaTeX exports.")
   (setq org-latex-compiler "xelatex")
@@ -581,7 +584,7 @@
         '(
           ("g" "General To-Do"
            entry (file+headline "~/org/agenda/todos.org" "General Tasks")
-           "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:%^g\n:Created: %U\nSCHEDULED:%^{Scheduled to begin}t DEADLINE:%^{DEADLINE}T\n%?"
+           "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:%^g\n:Created: %U\nSCHEDULED:%^{Scheduled to begin}t \n%?"
            :empty-lines 0)
         ("c" "Code To-Do"
           entry (file+headline "~/org/todos.org" "Code Related Tasks")
@@ -611,33 +614,33 @@
   (setq org-tag-alist '(
                         ;; my selections
                         (:startgroup . nil)
-                        ("private" . ?p)
-                        ("work" . ?w)
-                        ("activity" . ?a)
+                        ("private" 󰄛 . ?p)
+                        ("work"  . ?w)
+                        ("activity"  . ?a)
                         (:endgroup . nil)
 
                         ;; ticket types
                         (:startgroup . nil)
-                        ("@bug" . ?b)
-                        ("@feature" . ?u)
-                        ("@spike" . ?k)
+                        ("@bug"  . ?b)
+                        ("@feature" 󰡱 . ?u)
+                        ("@spike" 󰐰. ?k)
                         (:endgroup . nil)
 
                         ;; Ticket flags
-                        ("@scheduled" . ?s)
-                        ("@emergency" . ?e)
-                        ("@research" . ?r)
+                        ("@scheduled" . ?s)
+                        ("@emergency" 󱪄  . ?e)
+                        ("@research"  . ?r)
 
                         ;; Meeting types
                         (:startgroup . nil)
-                        ("general" . ?g)
-                        ("big_sprint_review" . ?r)
-                        ("normal_sprint_review" . ?n)
-                        ("ai" . ?a)
+                        ("general" 󰴺 . ?g)
+                        ("big_sprint_review" . ?r)
+                        ("normal_sprint_review" 󰔚 . ?n)
+                        ("ai" 󱜚 . ?a)
                         (:endgroup . nil)
 
                         ;; Code TODO tags
-                        ("QA" . ?q)
+                        ("QA" 󰺴. ?q)
                         ("foundation" . ?f)
                         ("broken_code" . ?c)
                         ("performance" . ?f)
@@ -671,18 +674,15 @@
               :straight t
               :config
               (setq org-agenda-custom-commands
-                    '(
-                      ("o" "Overwatch"
-                       (
-                        (agenda ""
-                                (
+                    '(("o" "Overwatch"
+                       ((agenda ""
+                                ((org-agenda-span 7)
                                  (org-agenda-remove-tags t)
-                                 (org-agenda-span 7)
-                                 )
-                                )
+                                 ;;(org-agenda-skip-scheduled-if-deadline-is-shown t)
+                                 (org-agenda-skip-timestamp-if-deadline-is-shown t)
+                                 (org-agenda-skip-deadline-if-done t)))
                         (tags-todo "+private"
                                  (
-                                  (org-agenda-remove-tags nil)
                                   (org-agenda-prefix-format "%t %s")
                                   (org-agenda-overriding-header "PRIVATE CURRENT")
                                   (org-super-agenda-groups
