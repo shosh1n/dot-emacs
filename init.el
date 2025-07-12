@@ -207,7 +207,17 @@
     :keymaps 'dired-mode-map
     "<return>" 'dired-find-file
     "^" 'dired-up-directory
-    )
+    "m" 'diredp-mark
+    "u" 'diredp-unmark-region-files
+    "d" 'diredp-flag-region-files-for-deletion
+    "x" 'diredp-do-delete-recursive
+    "+" 'dired-create-directory
+    "c" 'diredp-do-copy-recursive
+    "f" 'diredp-create-file-here
+    "U" 'diredp-unmark-all-files-recursive
+    "M" 'diredp-mark-files-tagged-not-all
+    "(" 'dired-hide-details-mode
+     )
    (general-define-key
     :states '(normal insert visual emacs motion)
     :keymaps '(override minibuffer-local-map)
@@ -566,19 +576,21 @@
   :straight t
   :after engrave-faces
   :hook ((org-mode . visual-line-mode)
-         (org-mode . org-num-mode))
+         )
   :init
   (auto-fill-mode -1)
+  (org-num-mode -1)
 
 
   :config
   (setq org-agenda-skip-scheduled-if-deadline-is-shown t
       org-agenda-skip-timestamp-if-deadline-is-shown t
       org-agenda-skip-deadline-if-done t)
+  (setq org-num-mode nil)
   (setq org-directory "~/org")
   ;;(defvar my-latex-font-size "12pt" "Default font size for LaTeX exports.")
   (setq org-latex-compiler "xelatex")
-  (setq org-agenda-files (list "~/org/agenda"))
+  (setq org-agenda-files (list "~/Dropbox/orgzly"))
   (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   (setq org-capture-templates
         '(
@@ -633,7 +645,7 @@
 
                         ;; Meeting types
                         (:startgroup . nil)
-                        ("general" 󰴺 . ?g)
+                        ( 󰴺 "general"  . ?g)
                         ("big_sprint_review" . ?r)
                         ("normal_sprint_review" 󰔚 . ?n)
                         ("ai" 󱜚 . ?a)
@@ -658,6 +670,13 @@
                         ;; Work Log Tags
                         ("accomplishment" . ?y)
                         ))
+  (setq org-agenda-category-icon-alist
+      `(;;("work"       ,(list (all-the-icons-material "work" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
+        ;;("activity"   ,(list (all-the-icons-faicon "bicycle" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
+        ;;("meeting"    ,(list (all-the-icons-material "event" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
+        ;;("@research"  ,(list (all-the-icons-material "science" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
+        ("general"    ,(list (nerd-icons-mdicon "nf-md-tank" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
+        ))
 
    :general
   (:states 'normal
@@ -793,6 +812,10 @@
                                             :tag "obstacle"
                                             :order 2
                                             )
+                                     (:name "Meeting Action Items"
+                                            :and (:tag "meeting" :priority "A")
+                                            :order 6
+                                            )
                                      (:name "On the way"
                                             :todo "IDEA"
                                             :tag "evolving"
@@ -829,9 +852,20 @@
 
 
 
+;;NOTE: dired-mark-suffix
+;; dired-extension
+;;F find marked
 (load (expand-file-name (concat user-emacs-directory "elisp/dired+/dired+")))
-;;(with-eval-after-load 'dired
-;;  (require 'dired+))
+(with-eval-after-load 'dired
+(require 'dired-x)
+(require 'dired+)
+(setq dired-auto-revert-buffer 1
+      dired-dwim-target t)
+)
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (dired-omit-mode 1)
+            ))
 
 (use-package avy
   :straight t
@@ -1090,3 +1124,30 @@
                                         :features "all")))))
    (add-to-list 'eglot-server-programs
      '(python-mode . ("/home/shoshin/miniconda3/bin/basedpyright-langserver" "--stdio"))))
+
+(use-package denote
+  :straight t
+  :hook (dired-mode . denote-dired-mode)
+  :general
+  (:states 'normal
+           (hc/leader
+             :infix "d"
+             "" '(nil :which-key "denote ..")
+             "SPC" '("denote" . denote)
+             "r" '("rename-file" . denote-rename-file)
+             "l" '("link file" . denote-link)
+             "b" '("back links" . denote-backlinks)
+             "d" '("denote dired" . denote-dired)
+             "s" '("denote grep" . denote-grep)
+             )
+           )
+  :config
+  (setq denote-directory (expand-file-name "~/Documents/notes"))
+  (setq denote-known-keywords '("idea" "emacs" "politics" "economics" "game" "cpp"))
+  (setq denote-infer-keywords t)
+  (setq denote-sort-keywords t)
+  (setq denote-prompts '(title keywords))
+  (setq denote-excluded-directories-regexp nil)
+  (setq denote-excluded-keywords-regexp nil)
+  (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
+  (denote-rename-buffer-mode 1))
