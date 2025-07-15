@@ -574,18 +574,45 @@
 
 (use-package org
   :straight t
-  :after engrave-faces
+  :after (engrave-faces cdlatex)
   :hook ((org-mode . visual-line-mode)
          )
-  :init
+
+    :init
+    :bind
+    (:map orgtbl-mode-map
+          ("<tab>" . lazytab-org-table-next-field-maybe)
+          ("TAB" . lazytab-org-table-next-field-maybe))
+
   (auto-fill-mode -1)
   (org-num-mode -1)
+  (add-hook 'org-mode-hook #'turn-on-org-cdlatex)
+  (add-hook 'cdlatex-tab-hook 'lazytab-cdlatex-or-orgtbl-next-field 90)
+    ;; Tabular environments using cdlatex
+  (add-to-list 'cdlatex-command-alist '("smat" "Insert smallmatrix env"
+                                       "\\left( \\begin{smallmatrix} ? \\end{smallmatrix} \\right)"
+                                       lazytab-position-cursor-and-edit
+                                       nil nil t))
+  (add-to-list 'cdlatex-command-alist '("bmat" "Insert bmatrix env"
+                                       "\\begin{bmatrix} ? \\end{bmatrix}"
+                                       lazytab-position-cursor-and-edit
+                                       nil nil t))
+  (add-to-list 'cdlatex-command-alist '("pmat" "Insert pmatrix env"
+                                       "\\begin{pmatrix} ? \\end{pmatrix}"
+                                       lazytab-position-cursor-and-edit
+                                       nil nil t))
+  (add-to-list 'cdlatex-command-alist '("tbl" "Insert table"
+                                        "\\begin{table}\n\\centering ? \\caption{}\n\\end{table}\n"
+                                       lazytab-position-cursor-and-edit
+                                       nil t nil))
 
 
   :config
+  (setq org-latex-packages-alist '(("" "amsmath" t)))
+  (load (expand-file-name (concat user-emacs-directory "elisp/my-latex/note-latex")))
   (setq org-agenda-skip-scheduled-if-deadline-is-shown t
-      org-agenda-skip-timestamp-if-deadline-is-shown t
-      org-agenda-skip-deadline-if-done t)
+        org-agenda-skip-timestamp-if-deadline-is-shown t
+        org-agenda-skip-deadline-if-done t)
   (setq org-num-mode nil)
   (setq org-directory "~/org")
   ;;(defvar my-latex-font-size "12pt" "Default font size for LaTeX exports.")
@@ -993,6 +1020,8 @@
 
 
 
+
+
 (setq display-buffer-alist
   '(
     ;;(BUFFER-MATCHER
@@ -1043,10 +1072,47 @@
              "l" '(:keymap lsp-command-map :which-key "lsp"))
   )
 
+;; clangd
+
+(defun lsp--string-vector-p (canidate)
+  "Return non-nil if CANIDATE is a vector and every element of it is a string"
+  (and
+   (vectorp canidate)
+   (seq-every-p #'stringp canidate)
+   ))
+
+(define-widget 'lsp-string-vector 'lazy
+  "A vector of zero or more elements, every element of which is a string, that adheres to a JSON array."
+  :offset 4
+  :tag "Vector"
+  :type '(restricted-sexp
+          :match-alternatives (lsp--string-vector-p)))
+
+(defcustom lsp-clangd-executeable ["clangd-18"
+                                      "clangd-17"
+                                      "clangd-16"
+                                      "clangd-15"
+                                      "clangd-14"
+                                      "clangd-13"
+                                      "clangd"]
+  "List of executeable names to search for when to run clangd. use `executeable-fund."
+  :risky t
+  :type 'lsp--string-vector)
+
+(defcustom lsp-clangd-args '("-j=4"
+                             "--background-index"
+                             "--log=error"
+                             "--clang-tidy")
+  "Extra arugments for the clangd executeable."
+  :risky t
+  :type '(repeat string)
+  )
 
 (use-package lsp-mode
   :straight t
   :init
+  (setq-default lsp-clients-clangd-executable
+        (seq-find #'executable-find lsp-clangd-executeable))
   ;; set prefix for lsp-command-keymap
   :hook ((python-mode . lsp)
          (org-mode . lsp)
@@ -1054,8 +1120,14 @@
          (markdown-mode . lsp)
          (LaTeX-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration)
+         (c++-mode . lsp)
+         (c-mode . lsp)
+         (objc-mode . lsp)
+         )
+  :custom
+  (lsp-clients-clangd-args lsp-clangd-args)
   )
-)
+
 
 (use-package lsp-ui
   :straight t
@@ -1151,3 +1223,102 @@
   (setq denote-excluded-keywords-regexp nil)
   (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
   (denote-rename-buffer-mode 1))
+
+(use-package auctex
+  :straight (:build t)
+  :hook (tex-mode . prettify-symbols-mode)
+  :hook (latex-mode . lsp-deferred)
+  :config
+  ;; Format math as a Latex string with Calc
+  (defun latex-math-from-calc ()
+    "Evaluate `calc' on the contents of line at point."
+    (interactive)
+    (cond ((region-active-p)
+           (let* ((beg (region-beginning))
+                  (end (region-end))
+                  (string (buffer-substring-no-properties beg end)))
+             (kill-region beg end)
+             (insert (calc-eval `(,string calc-language latex
+                                          calc-prefer-frac t
+                                          calc-angle-mode rad)))))
+          (t (let ((l (thing-at-point 'line)))
+               (end-of-line 1) (kill-line 0)
+               (insert (calc-eval `(,l
+                                    calc-language latex
+                                    calc-prefer-frac t
+                                    calc-angle-mode rad)))))))
+
+  (defun preview-larger-previews ()
+    (setq preview-scale-function
+          (lambda () (* 1.25
+                   (funcall (preview-scale-from-face))))))
+  )
+
+
+(use-package cdlatex
+  :ensure t
+  :hook (LaTeX-mode . turn-on-cdlatex)
+  :bind (:map cdlatex-mode-map
+              ("<tab>" . cdlatex-tab)))
+
+;; Yasnippet settings
+(use-package yasnippet
+  :ensure t
+  :hook ((LaTeX-mode . yas-minor-mode)
+         (post-self-insert . my/yas-try-expanding-auto-snippets))
+  :config
+  (use-package warnings
+    :config
+    (cl-pushnew '(yasnippet backquote-change)
+                warning-suppress-types
+                :test 'equal))
+
+  (setq yas-triggers-in-field t)
+
+  ;; Function that tries to autoexpand YaSnippets
+  ;; The double quoting is NOT a typo!
+  (defun my/yas-try-expanding-auto-snippets ()
+    (when (and (boundp 'yas-minor-mode) yas-minor-mode)
+      (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
+        (yas-expand)))))
+
+;; CDLatex integration with YaSnippet: Allow cdlatex tab to work inside Yas
+;; fields
+;;(use-package cdlatex
+;;  :hook ((cdlatex-tab . yas-expand)
+;;         (cdlatex-tab . cdlatex-in-yas-field))
+;;  :config
+;;  (use-package yasnippet
+;;    :bind (:map yas-keymap
+;;           ("<tab>" . yas-next-field-or-cdlatex)
+;;           ("TAB" . yas-next-field-or-cdlatex))
+;;    :config
+;;    (defun cdlatex-in-yas-field ()
+;;      ;; Check if we're at the end of the Yas field
+;;      (when-let* ((_ (overlayp yas--active-field-overlay))
+;;                  (end (overlay-end yas--active-field-overlay)))
+;;        (if (>= (point) end)
+;;            ;; Call yas-next-field if cdlatex can't expand here
+;;            (let ((s (thing-at-point 'sexp)))
+;;              (unless (and s (assoc (substring-no-properties s)
+;;                                    cdlatex-command-alist-comb))
+;;                (yas-next-field-or-maybe-expand)
+;;                t))
+;;          ;; otherwise expand and jump to the correct location
+;;          (let (cdlatex-tab-hook minp)
+;;            (setq minp
+;;                  (min (save-excursion (cdlatex-tab)
+;;                                       (point))
+;;                       (overlay-end yas--active-field-overlay)))
+;;            (goto-char minp) t))))
+;;
+;;    (defun yas-next-field-or-cdlatex nil
+;;      (interactive)
+;;      "Jump to the next Yas field correctly with cdlatex active."
+;;      (if
+;;          (or (bound-and-true-p cdlatex-mode)
+;;              (bound-and-true-p org-cdlatex-mode))
+;;          (cdlatex-tab)
+;;        (yas-next-field-or-maybe-expand)))))
+
+;; Array/tabular input with org-tables and cdlatex
