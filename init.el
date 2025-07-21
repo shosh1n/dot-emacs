@@ -145,9 +145,21 @@
   (setq evil-normal-state-cursor '(box "Pink")
   ))
 (custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-goggles-change-face ((t (:inherit diff-removed))))
+ '(evil-goggles-default-face ((t (:inherit 'unspecified))))
+ '(evil-goggles-delete-face ((t (:inherit diff-removed))))
+ '(evil-goggles-paste-face ((t (:inherit diff-added))))
+ '(evil-goggles-undo-redo-add-face ((t (:inherit diff-added))))
+ '(evil-goggles-undo-redo-change-face ((t (:inherit diff-changed))))
+ '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
+ '(evil-goggles-yank-face ((t (:inherit diff-changed))))
+ '(which-key-description-face ((t (:foreground "red"))))
  '(which-key-key-face ((t (:foreground "#8be9fd" :weight bold))))
- '(which-key-separator-face ((t (:foreground "#50fa7b"))))
- '(which-key-description-face ((t (:foreground "red")))))
+ '(which-key-separator-face ((t (:foreground "#50fa7b")))))
 
 
 
@@ -416,9 +428,40 @@
 ;;               :host github
 ;;               :repo "emacs-evil/evil-collection"))
 
-(use-package prescient
-  :straight t
-  )
+;;(use-package company
+;;  :straight t
+;;  :defer t
+;;  :config
+;;  (setq company-backends '((company-capf :with company-clang)))
+;;  )
+;;(use-package corfu-candidate-overlay
+;;  :straight (:type git
+;;             :repo "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
+;;             :files (:defaults "*.el"))
+
+;;  :after corfu
+;;  :config
+;;  ;; enable corfu-candidate-overlay mode globally
+;;  ;; this relies on having corfu-auto set to nil
+;;  (corfu-candidate-overlay-mode +1)
+;;  ;; bind Ctrl + TAB to trigger the completion popup of corfu
+;;  (global-set-key (kbd "C-<tab>") 'completion-at-point)
+;;  ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+;;  ;; (keybing <iso-lefttab> may not work for your keyboard model)
+;;  ;;(global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point)
+;;  )
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand))
+  :config
+  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
+  ;; Available since Emacs 29 (Use `dabbrev-ignored-buffer-regexps' on older Emacs)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'authinfo-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
+
 
 
 
@@ -427,15 +470,18 @@
   :init
   (global-corfu-mode)
   :custom
-  (corfu-auto nil)
+  (corfu-auto t)
+  (corfu-auto-delay 0.2)
   (corfu-cycle nil)
   (corfu-quit-at-boundary nil)
-  (corfu-quit-no-match nil)
-  (corfu-auto-prefix 2)
+  ;;(corfu-quit-no-match 'separator)
+  (corfu-auto-prefix 1)
+  (corfu-cycle t)
+  (corfu-preview-current nil)
   (corfu-min-width 80)
   (corfu-max-width 80)
   (corfu-scroll-margin 4)
-  ;;(corfu-preview-current nil)
+  (corfu-preview-current 1)
   (corfu-preselect 'prompt)
   ;;(corfu-on-exact match nil)
   :hook
@@ -451,15 +497,45 @@
             "<return>" #'corfu-insert
             "M-d" #'corfu-show-documentation
             "M-l" #'corfu-show-location)
+  :config
+  (setq completion-styles '(orderless basic flex))
+
   )
 
 (use-package cape
   :straight t
-  :general
-  (hc/leader
-    :infix "a"
-    "" '(nil :which-key "completions")
-    "f" '("file completions" . cape-file)))
+  :hook ((emacs-lisp-mode . kb/cape-capf-setup-elisp)
+         (c-mode-hook . kb/lsp-corfu-capf)
+         (c++-mode-hook . kb/lsp-corfu-capf)
+         )
+  :custom
+  (cape-dabbrev-min-length 5)
+  :init
+  (defun kb/cape-capf-ignore-keywords-elisp(cand)
+    ;; taken from: https://kristofferbalintona.me/posts/202203130102/
+    (or (not (keywordp cand))
+        (eq (char-after (car completion-in-region--data)) ?:)))
+  (defun kb/cape-capf-setup-elisp ()
+    (setq-local completion-at-point-functions
+                (list
+                 (cape-capf-properties
+                  #'elisp-completion-at-point
+                  :predicate #'kb/cape-capf-ignore-keywords-elisp)
+                 #'cape-elisp-symbol
+                 #'cape-file)))
+
+    ;;(require 'company-yasnippet)
+    ;;(add-to-list 'completion-at-point-functions (cape-company-to-capf #'company-yasnippet)))
+
+(defun my/lsp-corfu-capf ()
+  (setq-local completion-at-point-functions
+              (list #'lsp-completion-at-point
+                    #'cape-dabbrev))))
+
+(use-package modern-cpp-font-lock
+  :straight (:build t)
+  :defer t
+  :hook (c++-mode . modern-c++-font-lock-mode))
 
 
 ;; show functionalities
@@ -497,13 +573,21 @@
   (minibuffer-prompt-properties
    '(read-only t cursor-intangible t face minibuffer-prompt)))
 
+;;(use-package orderless
+;;  :straight t
+;;  :custom
+;;  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
+;;  (completion-styles '(orderless basic))
+;;  (completion-category-defaults nil)
+;;  (completion-category-overrides '((file (styles partial-completion)))))
+
 (use-package orderless
   :straight t
   :custom
-  ;;(orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
   (completion-styles '(orderless basic))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion)))))
+  (completion-category-overrides
+   '((lsp-capf (styles orderless))
+     (file (styles partial-completion)))))
 
 ;;; reduce shown functionalities
 (use-package diminish
@@ -608,6 +692,7 @@
 
 
   :config
+  (setq org-latex-compiler "xelatex")
   (setq org-latex-packages-alist '(("" "amsmath" t)))
   (load (expand-file-name (concat user-emacs-directory "elisp/my-latex/note-latex")))
   (setq org-agenda-skip-scheduled-if-deadline-is-shown t
@@ -1322,3 +1407,10 @@
 ;;        (yas-next-field-or-maybe-expand)))))
 
 ;; Array/tabular input with org-tables and cdlatex
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+;;(setq lsp-completion-enable-additional-text-edit nil)
+ '(org-latex-compiler "xelatex"))
