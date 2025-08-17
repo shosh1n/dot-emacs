@@ -1,0 +1,7 @@
+;;; init-tramp.el  --- Working with crontab -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
+
+(setq tramp-backup-directory-alist nil)
+(setq backup-inhib)
+;;; init-tramp.el ends here

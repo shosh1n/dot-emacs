@@ -61,6 +61,7 @@
         (unless (member base load-path)
           (add-to-list 'load-path name)))))))
 
+  (update-to-load-path "~/dot-emacs/lisp")
   (update-to-load-path (expand-file-name "elisp" user-emacs-directory))
 
   (defconst *sys/linux*
@@ -163,84 +164,6 @@
 
 
 
-(use-package general
-  :straight t
-  (general
-   :type git
-   :host github
-   :repo "noctuid/general.el"
-   )
-  :config
-  (general-create-definer hc/leader
-    ;; :prefix hc-key
-    ;; it's my leader key which should be available everywhere!
-    :prefix "SPC"
-    :states '(normal motion)
-    :keymaps 'override
-    )
-  (general-create-definer hc/leader-major
-    :prefix "S-SPC"
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    )
-  (hc/leader
-   :infix "f"
-   ""  '(nil :which-key "file operations")
-   "f" '("find a file" . find-file)
-   "r" '("open recent files" . recentf-open-files)
-   "d" '("📁 dired" . dired-jump)
-   "p" '("my config.el" . goto-user-config)
-   )
-
-   (hc/leader
-   :infix "SPC"
-   "" '(nil :which-key "emacs stuff")
-   "r" '("reload emacs-configuration" . reload-emacs-config)
-   )
-   (hc/leader
-   :infix "s"
-   "" '(nil :which-key "buffer operations")
-   "s" '("goto scratch buffer" . scratch-buffer)
-   "a" '("erease current buffer" . erase-buffer)
-   "e" '("goto scratch buffer" . eval-buffer)
-   )
-   (hc/leader
-   :infix "h"
-   "" '(nil :which-key "helpful stuff")
-   "v" '("describe variable!" . describe-variable)
-   "f" '("describe function!" . describe-function)
-   "k" '("describe key!" . describe-key)
-   "m" '("describe mode!" . describe-mode)
-   "c" '("describe command!" . describe-command)
-   )
-
-   (general-define-key
-    :states 'normal
-    :keymaps 'dired-mode-map
-    "<return>" 'dired-find-file
-    "^" 'dired-up-directory
-    "m" 'diredp-mark
-    "u" 'diredp-unmark-region-files
-    "d" 'diredp-flag-region-files-for-deletion
-    "x" 'diredp-do-delete-recursive
-    "+" 'dired-create-directory
-    "c" 'diredp-do-copy-recursive
-    "f" 'diredp-create-file-here
-    "U" 'diredp-unmark-all-files-recursive
-    "M" 'diredp-mark-files-tagged-not-all
-    "(" 'dired-hide-details-mode
-     )
-   (general-define-key
-    :states '(normal insert visual emacs motion)
-    :keymaps '(override minibuffer-local-map)
-    "C-S-v" 'consult-yank-from-kill-ring
-    )
-   ;;(general-define-key
-   ;; :states '(normal insert)
-   ;; :keymaps '(override minibuffer-local-map insert-mode-map)
-   ;; "M-p" 'completion-at-point
-   ;; )
-   )
 
 (use-package exec-path-from-shell
   :straight t
@@ -273,6 +196,9 @@
     :config
     (which-key-mode)
     )
+(require 'init-general)
+(require 'init-tramp)
+(require 'init-vterm)
 
 (defun reload-emacs-config ()
   (interactive) (load-file user-init-file))
@@ -501,12 +427,20 @@
   (setq completion-styles '(orderless basic flex))
 
   )
+(use-package cmake-mode
+  :defer t
+  :straight (:build t))
+(use-package cmake-font-lock
+  :defer t
+  :after cmake-mode
+  :straight (:build t))
 
 (use-package cape
   :straight t
   :hook ((emacs-lisp-mode . kb/cape-capf-setup-elisp)
          (c-mode-hook . kb/lsp-corfu-capf)
-         (c++-mode-hook . kb/lsp-corfu-capf)
+         (c++-mode-hook . my/lsp-corfu-capf)
+         (cmake-mode . my/lsp-corfu-capf)
          )
   :custom
   (cape-dabbrev-min-length 5)
@@ -530,7 +464,9 @@
 (defun my/lsp-corfu-capf ()
   (setq-local completion-at-point-functions
               (list #'lsp-completion-at-point
-                    #'cape-dabbrev))))
+                    #'cape-dabbrev)))
+
+)
 
 (use-package modern-cpp-font-lock
   :straight (:build t)
@@ -656,18 +592,23 @@
   (add-hook 'org-mode-hook #'valign-mode)
 )
 
+(use-package cdlatex
+  :ensure t
+  :hook (LaTeX-mode . turn-on-cdlatex)
+  :bind (:map cdlatex-mode-map
+              ("<tab>" . cdlatex-tab)))
+
+
 (use-package org
   :straight t
-  :after (engrave-faces cdlatex)
+  :after (engrave-faces cdlatex general)
   :hook ((org-mode . visual-line-mode)
          )
-
-    :init
-    :bind
-    (:map orgtbl-mode-map
-          ("<tab>" . lazytab-org-table-next-field-maybe)
-          ("TAB" . lazytab-org-table-next-field-maybe))
-
+  :bind
+  (:map orgtbl-mode-map
+        ("<tab>" . lazytab-org-table-next-field-maybe)
+        ("TAB" . lazytab-org-table-next-field-maybe))
+  :init
   (auto-fill-mode -1)
   (org-num-mode -1)
   (add-hook 'org-mode-hook #'turn-on-org-cdlatex)
@@ -689,8 +630,6 @@
                                         "\\begin{table}\n\\centering ? \\caption{}\n\\end{table}\n"
                                        lazytab-position-cursor-and-edit
                                        nil t nil))
-
-
   :config
   (setq org-latex-compiler "xelatex")
   (setq org-latex-packages-alist '(("" "amsmath" t)))
@@ -703,7 +642,7 @@
   ;;(defvar my-latex-font-size "12pt" "Default font size for LaTeX exports.")
   (setq org-latex-compiler "xelatex")
   (setq org-agenda-files (list "~/Dropbox/orgzly"))
-  (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+  (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
   (setq org-capture-templates
         '(
           ("g" "General To-Do"
@@ -724,7 +663,6 @@
   (setq org-todo-keywords
         '((sequence "TODO(t)" "PLANNING(p)" "IN-PROGRESS(i@/!)" "BLOCKED(@b!)" "|" "DONE(d!)" "OBE(o@!)" "WONT-DO(w@/!)")
           ))
-
   (setq org-todo-keyword-faces
         '(
           ("TODO" . (:foreground "GoldenRod" :weight bold))
@@ -790,20 +728,14 @@
         ("general"    ,(list (nerd-icons-mdicon "nf-md-tank" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
         ))
 
-   :general
-  (:states 'normal
-           (hc/leader
-             :infix "o"
-             ""  '(nil :which-key "org-mode")
-             "a" '("agenda" . org-agenda)
-             "l" '("org-store a link" . org-store-link)
-             "c" '("capture some tasks..." . org-capture)
-             ))
   )
 
 (use-package org-super-agenda
               :straight t
+              :after (org)
               :config
+              (with-eval-after-load 'org-agenda
+                (define-key org-agenda-mode-map (kbd "q") #'org-agenda-quit))
               (setq org-agenda-custom-commands
                     '(("o" "Overwatch"
                        ((agenda ""
@@ -943,6 +875,15 @@
                                  )
                         ))
                       ))
+  :general
+  (hc/leader
+    :states 'normal
+    :infix "o"
+    ""  '(nil :which-key "org-mode")
+    "a" '("agenda" . org-agenda)
+    "l" '("org-store a link" . org-store-link)
+    "c" '("capture some tasks..." . org-capture))
+
 )
 
 (use-package org-gcal
@@ -969,11 +910,11 @@
 ;;F find marked
 (load (expand-file-name (concat user-emacs-directory "elisp/dired+/dired+")))
 (with-eval-after-load 'dired
-(require 'dired-x)
-(require 'dired+)
-(setq dired-auto-revert-buffer 1
-      dired-dwim-target t)
-)
+  (require 'dired-x)
+  (require 'dired+)
+  (evil-define-key 'normal dired-mode-map (kbd "q") #'diredp-quit-window-kill)
+  (setq dired-auto-revert-buffer 1
+      dired-dwim-target t))
 (add-hook 'dired-mode-hook
           (lambda ()
             (dired-omit-mode 1)
@@ -1011,6 +952,7 @@
    :repo "jkitchin/org-ref"
    :files ("*.el"))
   :after org
+  :bind (bibtex-mode-map (kbd "c-c-b") 'org-ref-bibtex-hydra/body)
   :config
   (setq bibtex-autokey-year-length 4
     bibtex-autokey-name-year-separator "-"
@@ -1019,7 +961,6 @@
     bibtex-autokey-titlewords 2
     bibtex-autokey-titlewords-stretch 1
     bibtex-autokey-titleword-length 5)
-  :bind (bibtex-mode-map (kbd "H-b") 'org-ref-bibtex-hydra/body)
   )
 
 (use-package org-roam
@@ -1211,6 +1152,7 @@
          )
   :custom
   (lsp-clients-clangd-args lsp-clangd-args)
+  (setq lsp-cmake-server-command "/home/shoshin/miniconda3/bin/cmake-language-server /home/shoshin/.local/bin/cmake-language-server")
   )
 
 
@@ -1238,7 +1180,7 @@
   :config
   (setq lsp-ltex-language "de-DE")
   (setq lsp-ltex-mother-tongue "de-DE")
-  (setq lsp-ltex-file-extension-whitelist '("org" "txt" "md" "tex"))
+  (setq lsp-ltex-file-extension-whitelist '("org" "md" "tex"))
   (setq lsp-ltex-disabled-rules '(["MORFOLOGIK_RULE_DE"]))
   (setq lsp-log-io t)
   )
@@ -1340,12 +1282,6 @@
   )
 
 
-(use-package cdlatex
-  :ensure t
-  :hook (LaTeX-mode . turn-on-cdlatex)
-  :bind (:map cdlatex-mode-map
-              ("<tab>" . cdlatex-tab)))
-
 ;; Yasnippet settings
 (use-package yasnippet
   :ensure t
@@ -1366,6 +1302,7 @@
     (when (and (boundp 'yas-minor-mode) yas-minor-mode)
       (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
         (yas-expand)))))
+
 
 ;; CDLatex integration with YaSnippet: Allow cdlatex tab to work inside Yas
 ;; fields
@@ -1407,10 +1344,17 @@
 ;;        (yas-next-field-or-maybe-expand)))))
 
 ;; Array/tabular input with org-tables and cdlatex
+(use-package elcord
+  :straight t
+  :config
+  (setq elcord-mode t)
+  )
+;;(require 'init-crontab)
+(require 'init-sly)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
 ;;(setq lsp-completion-enable-additional-text-edit nil)
- '(org-latex-compiler "xelatex"))
+)
