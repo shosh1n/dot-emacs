@@ -37,6 +37,14 @@
           (add-hook 'minibuffer-setup-hook #'gc-minibuffer-setup-hook)
           (add-hook 'minibuffer-exit-hook #'gc-minibuffer-exit-hook)))
 
+(defun my/minibuffer-quit-clean ()
+  "Clean whitespace and quit minibuffer."
+  (interactive)
+  (when (minibufferp)
+    (delete-trailing-whitespace))
+  (abort-recursive-edit))
+(define-key minibuffer-local-map (kbd "C-g") #'my/minibuffer-quit-clean)
+
 (add-hook 'before-save-hook #'whitespace-cleanup)
 (global-subword-mode 1)
 (setq scroll-conservatively 1000)
@@ -196,7 +204,8 @@
     :config
     (which-key-mode)
     )
-(require 'init-general)
+
+
 (require 'init-tramp)
 (require 'init-vterm)
 
@@ -206,10 +215,6 @@
 (defun goto-user-config ()
   (interactive)(find-file user-init-file))
 
-(use-package nerd-icons-dired
-  :straight t
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
 
 
 (straight-use-package '(evil :host github :repo "emacs-evil/evil"))
@@ -241,6 +246,9 @@
     ;"µ" 'evil-set-marker
   ;  )
 )
+(require 'init-dired)
+(require 'init-general)
+
 
 
 (use-package key-chord
@@ -252,7 +260,6 @@
   ;(key-chord-define evil-normal-state-map "ok" 'abort-recursive-edit)
   ;(key-chord-define evil-insert-state-map "ok" 'abort-recursive-edit)
 )
-
 
 
 
@@ -565,7 +572,7 @@
   :straight t
   :after org
   :config
-  (global-org-modern-mode 1)
+  (global-org-modern-mode nil)
   )
 
 (use-package org-modern-indent
@@ -905,33 +912,20 @@
 
 
 
-;;NOTE: dired-mark-suffix
-;; dired-extension
-;;F find marked
-(load (expand-file-name (concat user-emacs-directory "elisp/dired+/dired+")))
-(with-eval-after-load 'dired
-  (require 'dired-x)
-  (require 'dired+)
-  (evil-define-key 'normal dired-mode-map (kbd "q") #'diredp-quit-window-kill)
-  (setq dired-auto-revert-buffer 1
-      dired-dwim-target t))
-(add-hook 'dired-mode-hook
-          (lambda ()
-            (dired-omit-mode 1)
-            ))
+
 
 (use-package avy
   :straight t
   :config
   )
 
-(use-package flyspell-correct
-  :after flyspell
-  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
-
-(use-package flyspell-correct-avy-menu
-  :straight t
-  :after flyspell-correct)
+;;(use-package flyspell-correct
+;;  :after flyspell
+;;  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
+;;
+;;(use-package flyspell-correct-avy-menu
+;;  :straight t
+;;  :after flyspell-correct)
 
 
 (use-package ispell
@@ -1226,6 +1220,7 @@
 
 (use-package denote
   :straight t
+  :after (dired)
   :hook (dired-mode . denote-dired-mode)
   :general
   (:states 'normal
@@ -1282,26 +1277,26 @@
   )
 
 
-;; Yasnippet settings
-(use-package yasnippet
-  :ensure t
-  :hook ((LaTeX-mode . yas-minor-mode)
-         (post-self-insert . my/yas-try-expanding-auto-snippets))
-  :config
-  (use-package warnings
-    :config
-    (cl-pushnew '(yasnippet backquote-change)
-                warning-suppress-types
-                :test 'equal))
 
-  (setq yas-triggers-in-field t)
 
-  ;; Function that tries to autoexpand YaSnippets
-  ;; The double quoting is NOT a typo!
-  (defun my/yas-try-expanding-auto-snippets ()
-    (when (and (boundp 'yas-minor-mode) yas-minor-mode)
-      (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
-        (yas-expand)))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ;; CDLatex integration with YaSnippet: Allow cdlatex tab to work inside Yas
@@ -1349,12 +1344,15 @@
   :config
   (setq elcord-mode t)
   )
+(require 'init-yasnippet)
+(require 'init-casual-suite)
 ;;(require 'init-crontab)
-(require 'init-sly)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
+;;(require 'init-sly)
+;;(custom-set-variable
+;; (setq TeX-engine "xetex")
+;; custom-set-variables was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init fie should contain only one such instance.
+;; If there is more than one, they won't work right.
 ;;(setq lsp-completion-enable-additional-text-edit nil)
-)
+;;)

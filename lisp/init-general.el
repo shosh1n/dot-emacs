@@ -3,12 +3,8 @@
 ;;; Code:
 
 (use-package general
-  :straight t
-  (general
-   :type git
-   :host github
-   :repo "noctuid/general.el"
-   )
+  :straight (general :type git :host github :repo "noctuid/general.el")
+  :demand t
   :config
   (general-create-definer hc/leader
     ;; :prefix hc-key
@@ -61,7 +57,7 @@
     "m" 'diredp-mark
     "u" 'diredp-unmark-region-files
     "d" 'diredp-flag-region-files-for-deletion
-    "x" 'diredp-do-delete-recursive
+    "x" 'dired-do-delete
     "+" 'dired-create-directory
     "c" 'diredp-do-copy-recursive
     "f" 'diredp-create-file-here
