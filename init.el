@@ -38,13 +38,15 @@
           (add-hook 'minibuffer-exit-hook #'gc-minibuffer-exit-hook)))
 
 (defun my/minibuffer-quit-clean ()
-  "Clean whitespace and quit minibuffer."
+  "Trim minibuffer input and quit minibuffer."
   (interactive)
   (when (minibufferp)
-    (delete-trailing-whitespace))
+    (let ((inhibit-read-only t))
+      (delete-region (point-min) (point-max))
+      (insert (string-trim (minibuffer-contents)))))
   (abort-recursive-edit))
-(define-key minibuffer-local-map (kbd "C-g") #'my/minibuffer-quit-clean)
 
+(define-key minibuffer-local-map (kbd "C-g") #'my/minibuffer-quit-clean)
 (add-hook 'before-save-hook #'whitespace-cleanup)
 (global-subword-mode 1)
 (setq scroll-conservatively 1000)
@@ -249,22 +251,15 @@
 (require 'init-dired)
 (require 'init-general)
 
+(require 'init-vertico)
+
 
 
 (use-package key-chord
   :straight t
   :config
   (key-chord-mode 1)
-  ;(key-chord-define evil-insert-state-map "ok" 'keyboard-quit)
-  ;(key-chord-define evil-normal-state-map "ok" 'keyboard-quit)
-  ;(key-chord-define evil-normal-state-map "ok" 'abort-recursive-edit)
-  ;(key-chord-define evil-insert-state-map "ok" 'abort-recursive-edit)
 )
-
-
-
-
-
 
 (use-package mpv
   :straight t
@@ -307,23 +302,7 @@
 (set-face-attribute 'variable-pitch nil :font "Iosevka Aile" :height my/default-variable-font-size :weight 'regular)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-;   se  ac age timu-rouge-theme
-;;  :straight t
-;;  :config
-;;  (load-theme 'timu-rouge t)
-;;)
-;;(use-package tokyo-theme
-;;  :straight
-;;  (:host github
-;;   :repo "rawleyfowler/tokyo-theme.el"
-;;   :files ("*.el")
-;;   )
-;;  :init
-;;  (let ((theme-dir (straight--build-dir "tokyo-theme")))
-;;    (unless (member theme-dir custom-theme-load-path)
-;;                    (add-to-list 'custom-theme-load-path theme-dir)))
-;;  :config
-;;  (load-theme 'tokyo t))
+
 
 (require 'time)
 (defun show-time ()
@@ -335,105 +314,20 @@
 (setq x-stretch-cursor t)
 (add-to-list 'default-frame-alist '(alpha-background . 0.98))
 
-;;(use-package projectile
-;;  :straight t
-;;  :init
-;;  (projectile-mode +1)
-;;  :config
-;;  :general
-;;  (hc/leader
-;;   :states '(normal motion)
-;;   :keymaps 'projectile-mode-map
-;;   "p" '(:keymap projectile-command-map :which-key "projectile"))
-;;  )
-
-
-
 (use-package dashboard
   :straight t
   :config
   (dashboard-setup-startup-hook))
 (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
 (setq dashboard-startup-banner "~/.config/doom/samus.png")
-;;(use-package evil-collection
-;;  :after (evil)
-;;  :straight (evil-collection :type git
-;;               :host github
-;;               :repo "emacs-evil/evil-collection"))
 
-;;(use-package company
-;;  :straight t
-;;  :defer t
-;;  :config
-;;  (setq company-backends '((company-capf :with company-clang)))
-;;  )
-;;(use-package corfu-candidate-overlay
-;;  :straight (:type git
-;;             :repo "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
-;;             :files (:defaults "*.el"))
+(require 'init-dabbrev)
+(require 'init-lsp)
+(require 'init-consult)
+(require 'init-corfu)
+(require 'init-cape)
+(require 'init-ltex)
 
-;;  :after corfu
-;;  :config
-;;  ;; enable corfu-candidate-overlay mode globally
-;;  ;; this relies on having corfu-auto set to nil
-;;  (corfu-candidate-overlay-mode +1)
-;;  ;; bind Ctrl + TAB to trigger the completion popup of corfu
-;;  (global-set-key (kbd "C-<tab>") 'completion-at-point)
-;;  ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
-;;  ;; (keybing <iso-lefttab> may not work for your keyboard model)
-;;  ;;(global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point)
-;;  )
-(use-package dabbrev
-  ;; Swap M-/ and C-M-/
-  :bind (("M-/" . dabbrev-completion)
-         ("C-M-/" . dabbrev-expand))
-  :config
-  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
-  ;; Available since Emacs 29 (Use `dabbrev-ignored-buffer-regexps' on older Emacs)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'authinfo-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
-
-
-
-
-(use-package corfu
-  :straight t
-  :init
-  (global-corfu-mode)
-  :custom
-  (corfu-auto t)
-  (corfu-auto-delay 0.2)
-  (corfu-cycle nil)
-  (corfu-quit-at-boundary nil)
-  ;;(corfu-quit-no-match 'separator)
-  (corfu-auto-prefix 1)
-  (corfu-cycle t)
-  (corfu-preview-current nil)
-  (corfu-min-width 80)
-  (corfu-max-width 80)
-  (corfu-scroll-margin 4)
-  (corfu-preview-current 1)
-  (corfu-preselect 'prompt)
-  ;;(corfu-on-exact match nil)
-  :hook
-  ((prog-mode . corfu-mode)
-   (shell-mode . corfu-mode)
-   (eshell-mode . corfu-mode)
-   (python-mode . corfu-mode))
-  :general
-  (:keymaps 'corfu-map
-            :states 'insert
-            "C-p" #'corfu-previous
-            "C-n" #'corfu-next
-            "<return>" #'corfu-insert
-            "M-d" #'corfu-show-documentation
-            "M-l" #'corfu-show-location)
-  :config
-  (setq completion-styles '(orderless basic flex))
-
-  )
 (use-package cmake-mode
   :defer t
   :straight (:build t))
@@ -442,38 +336,7 @@
   :after cmake-mode
   :straight (:build t))
 
-(use-package cape
-  :straight t
-  :hook ((emacs-lisp-mode . kb/cape-capf-setup-elisp)
-         (c-mode-hook . kb/lsp-corfu-capf)
-         (c++-mode-hook . my/lsp-corfu-capf)
-         (cmake-mode . my/lsp-corfu-capf)
-         )
-  :custom
-  (cape-dabbrev-min-length 5)
-  :init
-  (defun kb/cape-capf-ignore-keywords-elisp(cand)
-    ;; taken from: https://kristofferbalintona.me/posts/202203130102/
-    (or (not (keywordp cand))
-        (eq (char-after (car completion-in-region--data)) ?:)))
-  (defun kb/cape-capf-setup-elisp ()
-    (setq-local completion-at-point-functions
-                (list
-                 (cape-capf-properties
-                  #'elisp-completion-at-point
-                  :predicate #'kb/cape-capf-ignore-keywords-elisp)
-                 #'cape-elisp-symbol
-                 #'cape-file)))
 
-    ;;(require 'company-yasnippet)
-    ;;(add-to-list 'completion-at-point-functions (cape-company-to-capf #'company-yasnippet)))
-
-(defun my/lsp-corfu-capf ()
-  (setq-local completion-at-point-functions
-              (list #'lsp-completion-at-point
-                    #'cape-dabbrev)))
-
-)
 
 (use-package modern-cpp-font-lock
   :straight (:build t)
@@ -482,27 +345,8 @@
 
 
 ;; show functionalities
-(use-package vertico
-  :straight t
-  :custom
-  (vertico-count 7)
-  :init
-  (vertico-mode))
-(use-package consult
-  :straight t
 
-  :custom
-  (consult-preview-key nil)
-  :general
-  (:states 'normal
-           (hc/leader
-             :infix "b"
-             ""  '(nil :which-key "buffer management")
-             "b" '("Show Consult Buffers" . consult-buffer)
-             "p" '("goto previous buffer". previous-buffer)
-             "n" '("goto next buffer"  . next-buffer))
-           )
-  )
+
 
 (use-package vertico-prescient
   :straight t
@@ -572,7 +416,7 @@
   :straight t
   :after org
   :config
-  (global-org-modern-mode nil)
+  (global-org-modern-mode -1)
   )
 
 (use-package org-modern-indent
@@ -909,34 +753,16 @@
   (require 'ox-extra)
   (ox-extras-activate '(latex-header-blocks ignore-headlines)))
 
-
-
-
-
-
 (use-package avy
   :straight t
   :config
   )
-
-;;(use-package flyspell-correct
-;;  :after flyspell
-;;  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
-;;
-;;(use-package flyspell-correct-avy-menu
-;;  :straight t
-;;  :after flyspell-correct)
-
 
 (use-package ispell
   :if (executable-find "aspell")
   :straight (:type built-in)
   :config
   )
-
-
-
-
 
 (use-package org-ref
   :straight t
@@ -957,56 +783,6 @@
     bibtex-autokey-titleword-length 5)
   )
 
-(use-package org-roam
-  :straight
-  ;;(:host github
-  ;; :repo "org-roam/org-roam"
-  ;; :files (:defaults "extensions/*"))
-  :custom
-  (org-roam-directory (file-truename "~/.org/"))
-  :bind (
-     ("C-c n l" . org-roam-buffer-toggle)
-     ("C-c n f" . org-roam-node-find)
-     ("C-c n r" . org-roam-node-insert)
-     ("C-c n c" . org-roam-capture)
-     ;;:map org-mode-map
-     ;;("C-M-i" . completion-at-point)
-     ;;:map org-roam-dailies-map
-     ;;("Y" . org-roam-dailies-capture-yesterday)
-     ;;("T" . org-roam-dailies-capture-tomorrow))
-     ("C-c n j" . org-roam-dailies-capture-today))
-  :config
-  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  ;;(require 'org-roam-dailies)
-  (org-roam-db-autosync-mode)
-  (require 'org-roam-protocol)
-  )
-
-(use-package org-roam-ui
-  :straight t
-  ;;(org-roam
-  ;; :type git
-  ;; :host github
-  ;; :repo "org-roam/org-roam-ui"
-  ;; :branch "main"
-  ;; :files ("*.el" "out"))
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme t
-    org-roam-ui-follow t
-    org-roam-ui-update-on-save t
-    org-roam-ui-open-on-start t))
-
-(use-package org-roam-bibtex
-  :straight t
-  ;;(org-roam
-  ;; :type git
-  ;; :host github
-  ;; :repo "org-roam/org-roam-bibtex"
-  ;; :files (".el" "out"))
-  :after org-roam
-  :config
-  (setq bibtext-completion-library-path '("~/.org/arxiv.bib")))
 
 (use-package smartparens
   :straight t
@@ -1027,20 +803,6 @@
   (setq flycheck-idle-change-delay 2.0)
   (setq flycheck-buffer-switch-check-intermediate-buffers t)
   (setq flycheck-display-errors-delay 1))
-
-
-
-
-
-;;(with-eval-after-load 'lsp-mode
-;;  (define-key lsp-mode-map (kbd "SPC") nil)) ;; Stop SPC from triggering LSP menu
-;;
-;;(with-eval-after-load 'python
-;;  (define-key python-mode-map (kbd "SPC") nil))
-
-
-
-
 
 (setq display-buffer-alist
   '(
@@ -1077,227 +839,7 @@
 ;;  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
 ;;  (define-key python-mode-map (kbd "SPC") nil))
-(use-package python
-  :defer t
-  :straight (:build t)
-  :init
-  (setq python-indent-guess-indent-offset-verbose nil)
-  :config
-  (when (and (executable-find "python3")
-             (string= python-shell-interpreter "python"))
-    (setq python-shell-interpreter "python3"))
-  :general (hc/leader-major
-             :keymaps 'python-mode-map
-             :packages 'lsp-mode
-             "l" '(:keymap lsp-command-map :which-key "lsp"))
-  )
-
 ;; clangd
-
-(defun lsp--string-vector-p (canidate)
-  "Return non-nil if CANIDATE is a vector and every element of it is a string"
-  (and
-   (vectorp canidate)
-   (seq-every-p #'stringp canidate)
-   ))
-
-(define-widget 'lsp-string-vector 'lazy
-  "A vector of zero or more elements, every element of which is a string, that adheres to a JSON array."
-  :offset 4
-  :tag "Vector"
-  :type '(restricted-sexp
-          :match-alternatives (lsp--string-vector-p)))
-
-(defcustom lsp-clangd-executeable ["clangd-18"
-                                      "clangd-17"
-                                      "clangd-16"
-                                      "clangd-15"
-                                      "clangd-14"
-                                      "clangd-13"
-                                      "clangd"]
-  "List of executeable names to search for when to run clangd. use `executeable-fund."
-  :risky t
-  :type 'lsp--string-vector)
-
-(defcustom lsp-clangd-args '("-j=4"
-                             "--background-index"
-                             "--log=error"
-                             "--clang-tidy")
-  "Extra arugments for the clangd executeable."
-  :risky t
-  :type '(repeat string)
-  )
-
-(use-package lsp-mode
-  :straight t
-  :init
-  (setq-default lsp-clients-clangd-executable
-        (seq-find #'executable-find lsp-clangd-executeable))
-  ;; set prefix for lsp-command-keymap
-  :hook ((python-mode . lsp)
-         (org-mode . lsp)
-         (text-mode . lsp)
-         (markdown-mode . lsp)
-         (LaTeX-mode . lsp)
-         (lsp-mode . lsp-enable-which-key-integration)
-         (c++-mode . lsp)
-         (c-mode . lsp)
-         (objc-mode . lsp)
-         )
-  :custom
-  (lsp-clients-clangd-args lsp-clangd-args)
-  (setq lsp-cmake-server-command "/home/shoshin/miniconda3/bin/cmake-language-server /home/shoshin/.local/bin/cmake-language-server")
-  )
-
-
-(use-package lsp-ui
-  :straight t
-  :commands lsp-ui-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-sideline-enable t)
-  (lsp-ui-sideline-show-diagnostics t)
-  (lsp-ui-sideline-show-hover t)
-  (lsp-ui-doc-enable t)
-  )
-
-
-(use-package lsp-ltex
-  :straight t
-  :after lsp-mode
-  :init
-  (setq lsp-ltex-version "16.0.0")
-  :hook ((org-mode . lsp)
-         (text-mode  . lsp)
-         (markdown-mode . lsp)
-         (LaTeX-mode . lsp))
-  :config
-  (setq lsp-ltex-language "de-DE")
-  (setq lsp-ltex-mother-tongue "de-DE")
-  (setq lsp-ltex-file-extension-whitelist '("org" "md" "tex"))
-  (setq lsp-ltex-disabled-rules '(["MORFOLOGIK_RULE_DE"]))
-  (setq lsp-log-io t)
-  )
-
-(defun my/lsp-ltex-set-documentKind ()
-  (cond
-   ((derived-mode-p 'org-mode)
-    (setq-local lsp-ltex-documentKinds ["plaintext"]))
-   ((derived-mode-p 'markdown-mode)
-    (setq-local lsp-ltex-documentKinds ["markdown"]))
-   ((derived-mode-p 'LaTeX-mode)
-    (setq-local lsp-ltex-documentKinds ["latex"]))
-   (t
-    (setq-local lsp-ltex-documentKinds ["plaintext"]))))
-
-(add-hook 'lsp-mode-hook #'my/lsp-ltex-set-documentKind)
-
-
-(use-package rust-mode
-  :straight t
-  :init
-  ;;(setq rust-mode-treesitter-derive t)
-  :config
-  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
-  (let ((dot-cargo-bin (expand-file-name "~/.cargo/bin/")))
-    (setq rust-rustfmt-bin (concat dot-cargo-bin "rustfmt")
-          rust-cargo-bin (concat dot-cargo-bin "cargo")
-          rust-format-on-save t)))
-
-
-(use-package eglot
-  :straight t
-  (eglot
-   :type built-in)
-  :config
-  (add-to-list 'eglot-server-programs
-   '(rust-mode . ("rust-analyzer" :initializationOptions
-                 (:procMacro (:enable t)
-                  :cargo (:buildScripts (:enable t)
-                                        :features "all")))))
-   (add-to-list 'eglot-server-programs
-     '(python-mode . ("/home/shoshin/miniconda3/bin/basedpyright-langserver" "--stdio"))))
-
-(use-package denote
-  :straight t
-  :after (dired)
-  :hook (dired-mode . denote-dired-mode)
-  :general
-  (:states 'normal
-           (hc/leader
-             :infix "d"
-             "" '(nil :which-key "denote ..")
-             "SPC" '("denote" . denote)
-             "r" '("rename-file" . denote-rename-file)
-             "l" '("link file" . denote-link)
-             "b" '("back links" . denote-backlinks)
-             "d" '("denote dired" . denote-dired)
-             "s" '("denote grep" . denote-grep)
-             )
-           )
-  :config
-  (setq denote-directory (expand-file-name "~/Documents/notes"))
-  (setq denote-known-keywords '("idea" "emacs" "politics" "economics" "game" "cpp"))
-  (setq denote-infer-keywords t)
-  (setq denote-sort-keywords t)
-  (setq denote-prompts '(title keywords))
-  (setq denote-excluded-directories-regexp nil)
-  (setq denote-excluded-keywords-regexp nil)
-  (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
-  (denote-rename-buffer-mode 1))
-
-(use-package auctex
-  :straight (:build t)
-  :hook (tex-mode . prettify-symbols-mode)
-  :hook (latex-mode . lsp-deferred)
-  :config
-  ;; Format math as a Latex string with Calc
-  (defun latex-math-from-calc ()
-    "Evaluate `calc' on the contents of line at point."
-    (interactive)
-    (cond ((region-active-p)
-           (let* ((beg (region-beginning))
-                  (end (region-end))
-                  (string (buffer-substring-no-properties beg end)))
-             (kill-region beg end)
-             (insert (calc-eval `(,string calc-language latex
-                                          calc-prefer-frac t
-                                          calc-angle-mode rad)))))
-          (t (let ((l (thing-at-point 'line)))
-               (end-of-line 1) (kill-line 0)
-               (insert (calc-eval `(,l
-                                    calc-language latex
-                                    calc-prefer-frac t
-                                    calc-angle-mode rad)))))))
-
-  (defun preview-larger-previews ()
-    (setq preview-scale-function
-          (lambda () (* 1.25
-                   (funcall (preview-scale-from-face))))))
-  )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ;; CDLatex integration with YaSnippet: Allow cdlatex tab to work inside Yas
 ;; fields
@@ -1339,13 +881,13 @@
 ;;        (yas-next-field-or-maybe-expand)))))
 
 ;; Array/tabular input with org-tables and cdlatex
-(use-package elcord
-  :straight t
-  :config
-  (setq elcord-mode t)
-  )
+
+(require 'init-auctex)
+(require 'init-denote)
+(require 'init-graphviz)
 (require 'init-yasnippet)
 (require 'init-casual-suite)
+(require 'init-org-roam)
 ;;(require 'init-crontab)
 ;;(require 'init-sly)
 ;;(custom-set-variable
@@ -1356,3 +898,14 @@
 ;; If there is more than one, they won't work right.
 ;;(setq lsp-completion-enable-additional-text-edit nil)
 ;;)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(safe-local-variable-values '((git-commit-major-mode . git-commit-elisp-text-mode)))
+ '(tramp-default-host "172.104.241.26")
+ '(tramp-default-method "rsync")
+ '(tramp-default-user "sanakan")
+ '(yas-snippet-dirs
+   '("/home/shoshin/.emacs.d/straight/build/yasnippet-snippets/snippets")))

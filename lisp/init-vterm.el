@@ -1,6 +1,7 @@
-;;; init-vterm .el  --- Working with crontab -*- lexical-binding: t -*-
+;;; init-vterm .el  --- Working with vterm -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+
 (use-package vterm
   :defer t
   :straight (:build t)
@@ -94,6 +95,6 @@
 
   ;; Override vterm command safely
   (defalias 'vterm #'me/vterm-popup))
-(provide 'init-vterm )
 
+(provide 'init-vterm)
 ;;; init-vterm .el ends here
