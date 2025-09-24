@@ -1,4 +1,4 @@
-;;; init-sly.el  --- Working with crontab -*- lexical-binding: t -*-
+;;; init-sly.el  --- Working with sly -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
 

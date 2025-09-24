@@ -27,10 +27,17 @@
   :custom
   (org-roam-directory (file-truename "~/.org/"))
   (org-roam-capture-templates
-   '(("d" "default" plain
+   '(
+     ("d" "default" plain
       "%?"
       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)))
+      :unnarrowed t)
+   ("p" "programming notes" plain
+      (file "~/dot-emacs/lisp/templates/prog-template.org")
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      )
+   )
+   )
   )
 
 (use-package org-roam-ui
@@ -95,6 +102,13 @@
         (insert "            (org-roam-ui-mode 1)))\n")
         (insert ")))\n"))  ;; Properly close the list
       (message ".dir-locals.el created in: %s" dir-locals-file))))
+
+(defun org-roam-node-insert-immediate (arg &rest args)
+  (interactive "P")
+  (let ((args (cons arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
 
 (provide 'init-org-roam)
 

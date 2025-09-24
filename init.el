@@ -36,6 +36,9 @@
         (setq gc-cons-threshold better-gc-cons-threshold))
           (add-hook 'minibuffer-setup-hook #'gc-minibuffer-setup-hook)
           (add-hook 'minibuffer-exit-hook #'gc-minibuffer-exit-hook)))
+(setq backup-directory-alist `(("." . "~/.emacs.d/backups/")))
+(setq auto-save-file-name-transforms
+      `((".*" "~/.emacs.d/auto-saves/" t)))
 
 (defun my/minibuffer-quit-clean ()
   "Trim minibuffer input and quit minibuffer."
@@ -128,15 +131,39 @@
   (eval-when-compile
    (require 'use-package)
    (require 'bind-key))
-
 (setq custom-safe-themes t)
 
-(use-package doom-modeline
-  :straight t
-  :hook (after-init . doom-modeline-mode)
+(straight-use-package '(evil :host github :repo "emacs-evil/evil"))
+(use-package evil
+  :init
+  (setq evil-want-integration t) ;; optional sincce it's already set to t by default
+  (setq evil-want-keybinding nil)
+  (setq evil-undo-system 'undo-fu)
   :custom
-  (doom-modeline-time-analogue-clock t)
-  )
+  (evil-insert-state-cursor '(bar "Green"))
+  (evil-visual-state-cursor '(box "White"))
+  (evil-normal-state-cursor '(box "Pink"))
+  (evil-want-minibuffer t)
+  :hook (after-init . evil-mode)
+  :config
+   (evil-mode 1)
+   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  (setq evil-normal-state-modes
+        (append evil-emacs-state-modes
+        evil-insert-state-modes
+        evil-normal-state-modes
+        evil-motion-state-modes))
+  ;:general
+  ;(general-define-key
+  ;  :states 'normal
+  ; "M-n" 'evil-next-mark
+    ;"þ" 'evil-previous-mark
+    ;"µ" 'evil-set-marker
+  ;  )
+)
+
+
 (use-package nerd-icons
   :straight t
 )
@@ -171,9 +198,6 @@
  '(which-key-description-face ((t (:foreground "red"))))
  '(which-key-key-face ((t (:foreground "#8be9fd" :weight bold))))
  '(which-key-separator-face ((t (:foreground "#50fa7b")))))
-
-
-
 
 (use-package exec-path-from-shell
   :straight t
@@ -219,38 +243,10 @@
 
 
 
-(straight-use-package '(evil :host github :repo "emacs-evil/evil"))
-(use-package evil
-  :init
-  (setq evil-want-integration t) ;; optional sincce it's already set to t by default
-  (setq evil-want-keybinding nil)
-  (setq evil-undo-system 'undo-fu)
-  :custom
-  (evil-insert-state-cursor '(bar "Green"))
-  (evil-visual-state-cursor '(box "White"))
-  (evil-normal-state-cursor '(box "Pink"))
-  (evil-want-minibuffer t)
-  :hook (after-init . evil-mode)
-  :config
-   (evil-mode 1)
-   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-  (setq evil-normal-state-modes
-        (append evil-emacs-state-modes
-        evil-insert-state-modes
-        evil-normal-state-modes
-        evil-motion-state-modes))
-  ;:general
-  ;(general-define-key
-  ;  :states 'normal
-  ; "M-n" 'evil-next-mark
-    ;"þ" 'evil-previous-mark
-    ;"µ" 'evil-set-marker
-  ;  )
-)
+
 (require 'init-dired)
 (require 'init-general)
-
+(require 'init-org)
 (require 'init-vertico)
 
 
@@ -314,19 +310,12 @@
 (setq x-stretch-cursor t)
 (add-to-list 'default-frame-alist '(alpha-background . 0.98))
 
-(use-package dashboard
-  :straight t
-  :config
-  (dashboard-setup-startup-hook))
-(setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
-(setq dashboard-startup-banner "~/.config/doom/samus.png")
-
 (require 'init-dabbrev)
 (require 'init-lsp)
 (require 'init-consult)
 (require 'init-corfu)
 (require 'init-cape)
-(require 'init-ltex)
+;;(require 'init-ltex)
 
 (use-package cmake-mode
   :defer t
@@ -405,43 +394,15 @@
    '(evil-goggles-paste-face ((t (:inherit 'lazy-highlight))))
    '(evil-goggles-yank-face ((t (:inherit 'isearch-fail))))))
 
-(use-package engrave-faces
-  :straight t
-  )
+
 
 (use-package oauth2
   :straight t
   )
-(use-package org-modern
-  :straight t
-  :after org
-  :config
-  (global-org-modern-mode -1)
-  )
 
-(use-package org-modern-indent
-  :straight (:package org-modern-indent
-                      :type built-in
-                      :local-repo "org-modern-indent"
-                      :files ("org-modern-indent.el")
-                      )
-  :load-path "~/.emacs.d/elisp/org-modern-indent"
-  :after (org org-modern)
-  :config
-  (add-hook 'org-mode-hook #'org-modern-indent-mode 90)
-  )
 
-(use-package valign
-  :straight (:package valign
-                      :type built-in
-                      :local-repo "valign"
-                      :files ("valign.el")
-                      )
-  :load-path "~/.emacs.d/elisp/valign"
-  :after (org)
-  :config
-  (add-hook 'org-mode-hook #'valign-mode)
-)
+
+
 
 (use-package cdlatex
   :ensure t
@@ -449,321 +410,9 @@
   :bind (:map cdlatex-mode-map
               ("<tab>" . cdlatex-tab)))
 
-
-(use-package org
-  :straight t
-  :after (engrave-faces cdlatex general)
-  :hook ((org-mode . visual-line-mode)
-         )
-  :bind
-  (:map orgtbl-mode-map
-        ("<tab>" . lazytab-org-table-next-field-maybe)
-        ("TAB" . lazytab-org-table-next-field-maybe))
-  :init
-  (auto-fill-mode -1)
-  (org-num-mode -1)
-  (add-hook 'org-mode-hook #'turn-on-org-cdlatex)
-  (add-hook 'cdlatex-tab-hook 'lazytab-cdlatex-or-orgtbl-next-field 90)
-    ;; Tabular environments using cdlatex
-  (add-to-list 'cdlatex-command-alist '("smat" "Insert smallmatrix env"
-                                       "\\left( \\begin{smallmatrix} ? \\end{smallmatrix} \\right)"
-                                       lazytab-position-cursor-and-edit
-                                       nil nil t))
-  (add-to-list 'cdlatex-command-alist '("bmat" "Insert bmatrix env"
-                                       "\\begin{bmatrix} ? \\end{bmatrix}"
-                                       lazytab-position-cursor-and-edit
-                                       nil nil t))
-  (add-to-list 'cdlatex-command-alist '("pmat" "Insert pmatrix env"
-                                       "\\begin{pmatrix} ? \\end{pmatrix}"
-                                       lazytab-position-cursor-and-edit
-                                       nil nil t))
-  (add-to-list 'cdlatex-command-alist '("tbl" "Insert table"
-                                        "\\begin{table}\n\\centering ? \\caption{}\n\\end{table}\n"
-                                       lazytab-position-cursor-and-edit
-                                       nil t nil))
-  :config
-  (setq org-latex-compiler "xelatex")
-  (setq org-latex-packages-alist '(("" "amsmath" t)))
-  (load (expand-file-name (concat user-emacs-directory "elisp/my-latex/note-latex")))
-  (setq org-agenda-skip-scheduled-if-deadline-is-shown t
-        org-agenda-skip-timestamp-if-deadline-is-shown t
-        org-agenda-skip-deadline-if-done t)
-  (setq org-num-mode nil)
-  (setq org-directory "~/org")
-  ;;(defvar my-latex-font-size "12pt" "Default font size for LaTeX exports.")
-  (setq org-latex-compiler "xelatex")
-  (setq org-agenda-files (list "~/Dropbox/orgzly"))
-  (add-to-list  'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
-  (setq org-capture-templates
-        '(
-          ("g" "General To-Do"
-           entry (file+headline "~/org/agenda/todos.org" "General Tasks")
-           "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:%^g\n:Created: %U\nSCHEDULED:%^{Scheduled to begin}t \n%?"
-           :empty-lines 0)
-        ("c" "Code To-Do"
-          entry (file+headline "~/org/todos.org" "Code Related Tasks")
-          "* TODO [#B] %?\n:Created: %T\n%i\n%a\nProposed Solution: ")
-          ("m" "Meeting"
-          entry (file+datetree "~/org/agenda/meetings.org")
-          "* %? :meeting:%^g \n:Created: %T\n** Attendees\n*** \n** Notes\n** Action Items\n*** TODO [#A] "
-          :tree-type week
-          :clock-in t
-          :clock-resume t
-          :empty-lines 0)
-        ))
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "PLANNING(p)" "IN-PROGRESS(i@/!)" "BLOCKED(@b!)" "|" "DONE(d!)" "OBE(o@!)" "WONT-DO(w@/!)")
-          ))
-  (setq org-todo-keyword-faces
-        '(
-          ("TODO" . (:foreground "GoldenRod" :weight bold))
-          ("IN-PROGRESS"  (:foreground "DeepPink" :weight bold))
-          ("BLOCKED" . (:foreground "Cyan" :weight bold))
-          ("DONE" . (:foreground "LimeGreen" :weight bold))
-          ("OBE" . (:foreground "DarkOrange" :weight bold))
-          ("WONT-DO" . (:foreground "Cyan" :weight bold))
-          )
-        )
-  (setq org-tag-alist '(
-                        ;; my selections
-                        (:startgroup . nil)
-                        ("private" 󰄛 . ?p)
-                        ("work"  . ?w)
-                        ("activity"  . ?a)
-                        (:endgroup . nil)
-
-                        ;; ticket types
-                        (:startgroup . nil)
-                        ("@bug"  . ?b)
-                        ("@feature" 󰡱 . ?u)
-                        ("@spike" 󰐰. ?k)
-                        (:endgroup . nil)
-
-                        ;; Ticket flags
-                        ("@scheduled" . ?s)
-                        ("@emergency" 󱪄  . ?e)
-                        ("@research"  . ?r)
-
-                        ;; Meeting types
-                        (:startgroup . nil)
-                        ( 󰴺 "general"  . ?g)
-                        ("big_sprint_review" . ?r)
-                        ("normal_sprint_review" 󰔚 . ?n)
-                        ("ai" 󱜚 . ?a)
-                        (:endgroup . nil)
-
-                        ;; Code TODO tags
-                        ("QA" 󰺴. ?q)
-                        ("foundation" . ?f)
-                        ("broken_code" . ?c)
-                        ("performance" . ?f)
-
-                        ;; Special tags
-                        ("CRITICAL" . ?x)
-                        ("obstacle" . ?o)
-
-                        ;; Meetings tags
-                        ("HR" . ?h)
-                        ("general" . ?l)
-                        ("meeting" . ?m)
-                        ("misc" . ?z)
-
-                        ;; Work Log Tags
-                        ("accomplishment" . ?y)
-                        ))
-  (setq org-agenda-category-icon-alist
-      `(;;("work"       ,(list (all-the-icons-material "work" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
-        ;;("activity"   ,(list (all-the-icons-faicon "bicycle" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
-        ;;("meeting"    ,(list (all-the-icons-material "event" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
-        ;;("@research"  ,(list (all-the-icons-material "science" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
-        ("general"    ,(list (nerd-icons-mdicon "nf-md-tank" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)
-        ))
-
-  )
-
-(use-package org-super-agenda
-              :straight t
-              :after (org)
-              :config
-              (with-eval-after-load 'org-agenda
-                (define-key org-agenda-mode-map (kbd "q") #'org-agenda-quit))
-              (setq org-agenda-custom-commands
-                    '(("o" "Overwatch"
-                       ((agenda ""
-                                ((org-agenda-span 7)
-                                 (org-agenda-remove-tags t)
-                                 ;;(org-agenda-skip-scheduled-if-deadline-is-shown t)
-                                 (org-agenda-skip-timestamp-if-deadline-is-shown t)
-                                 (org-agenda-skip-deadline-if-done t)))
-                        (tags-todo "+private"
-                                 (
-                                  (org-agenda-prefix-format "%t %s")
-                                  (org-agenda-overriding-header "PRIVATE CURRENT")
-                                  (org-super-agenda-groups
-                                   '(
-                                     (:name "Personal"
-                                            :tag "CRITICAL"
-                                            :order 0
-                                      )
-                                     (:name "Currently Working"
-                                            :todo "IN-PROGRESS"
-                                            :order 1
-                                            )
-                                     (:name "Scheduled"
-                                            :todo "PLANNING"
-                                            :tag "obstacle"
-                                            :order 2
-                                            )
-                                     (:name "On the way"
-                                            :todo "IDEA"
-                                            :tag "evolving"
-                                            :order 3
-                                            )
-                                     (:name "General Backlog"
-                                            :and (:todo "TODO" :priority "B")
-                                            :order 4
-                                      )
-                                     )
-                                   )
-                                  )
-                                 )
-                        (tags-todo "+work"
-                                 (
-                                  ;; Remove tags to make the view cleaner
-                                  (org-agenda-remove-tags nil)
-                                  (org-agenda-prefix-format " %t %s")
-                                  (org-agenda-overriding-header "WORK CURRENT")
-
-                                  ;; Define the super agenda groups (sorts by oder)
-                                  (org-super-agenda-groups
-                                   '(
-                                     ;; Filter where tag is CRITICAL
-                                     (:name "Critical Tasks"
-                                            :tag "CRITICAL"
-                                            :order 0
-                                            )
-                                     ;; Filter where TODO is IN-PROGRESS
-                                     (:name "Currently Working"
-                                            :todo "IN-PROGRESS"
-                                            :order 1
-                                            )
-                                     ;; Filter where TODO state is BLOCKED  - or obstacle!
-                                     (:name "Problems & Blockers"
-                                            :todo "BLOCKED"
-                                            :tag "obstacle"
-                                            :order 2
-                                            )
-                                     ;; Filter where tag is @write_future_ticker
-                                     (:name "Scheduled and Planning"
-                                            :tag "@scheduled"
-                                            :order 4
-                                            )
-                                     ;; Filter where tag is @research
-                                     (:name "Research Required"
-                                            :tag "@research"
-                                            :order 5
-                                            )
-                                     ;; Filter where tag is meeting and priority A  (only want TODOs from meetings)
-                                     (:name "Meeting Action Items"
-                                            :and (:tag "meeting" :priority "A")
-                                            :order 6
-                                            )
-                                     ;; Filter where state is TODO and the priority is A and the tag is not meeting
-                                     (:name "Other Important Items"
-                                            :and (:todo "TODO" :priority "A" :not (:tag "meeting" )
-                                            ))
-                                     ;; Filter where the priority is C or less (supports future lower priorities)
-                                     (:name "Non Critical"
-                                            :priority <= "C"
-                                            :order 7
-                                            )
-                                     ;; Filter where TODO state is VERIFYING
-                                     (:name "Currently Being Verified"
-                                            :todo "VERIFYING"
-                                            :order 8
-                                            )
-                                     )
-                                   )
-                                  )
-                                  )
-
-                        (tags-todo "+activity"
-                                 (
-                                  (org-agenda-remove-tags nil)
-                                  (org-agenda-prefix-format "%t %s")
-                                  (org-agenda-overriding-header "ACTIVITY CURRENT")
-                                  (org-super-agenda-groups
-                                   '(
-                                     (:name "On the Top"
-                                            :tag "CRITICAL"
-                                            :order 0
-                                      )
-                                     (:name "Currently Processed"
-                                            :todo "IN-PROGRESS"
-                                            :order 1
-                                            )
-                                     (:name "On Schedule"
-                                            :todo "PLANNING"
-                                            :tag "obstacle"
-                                            :order 2
-                                            )
-                                     (:name "Meeting Action Items"
-                                            :and (:tag "meeting" :priority "A")
-                                            :order 6
-                                            )
-                                     (:name "On the way"
-                                            :todo "IDEA"
-                                            :tag "evolving"
-                                            :order 3
-                                            )
-                                     (:name "General Backlog"
-                                            :and (:todo "TODO" :priority ("B" "A"))
-                                            :order 4
-                                      )
-                                     )
-                                   )
-                                  )
-                                 )
-                        ))
-                      ))
-  :general
-  (hc/leader
-    :states 'normal
-    :infix "o"
-    ""  '(nil :which-key "org-mode")
-    "a" '("agenda" . org-agenda)
-    "l" '("org-store a link" . org-store-link)
-    "c" '("capture some tasks..." . org-capture))
-
-)
-
-(use-package org-gcal
-  :straight t
-  :after org
-  :init
-  (setq org-gcal-fetch-file-alist '(("hermannschris@googlemail.com" . "~/org/dates.org")))
-  :config
-  (setq plstore-cache-passphrase-for-symmetric-encryption t)
-  )
-
-(use-package org-contrib
-  :after (org)
-  :straight t
-  :init
-  (require 'ox-extra)
-  (ox-extras-activate '(latex-header-blocks ignore-headlines)))
-
-(use-package avy
-  :straight t
-  :config
-  )
-
-(use-package ispell
-  :if (executable-find "aspell")
-  :straight (:type built-in)
-  :config
-  )
-
+(require 'init-org-roam)
+(require 'init-org-agenda)
+(require 'init-dashboard)
 (use-package org-ref
   :straight t
   (org-ref
@@ -781,6 +430,16 @@
     bibtex-autokey-titlewords 2
     bibtex-autokey-titlewords-stretch 1
     bibtex-autokey-titleword-length 5)
+  )
+(use-package avy
+  :straight t
+  :config
+  )
+
+(use-package ispell
+  :if (executable-find "aspell")
+  :straight (:type built-in)
+  :config
   )
 
 
@@ -887,7 +546,12 @@
 (require 'init-graphviz)
 (require 'init-yasnippet)
 (require 'init-casual-suite)
-(require 'init-org-roam)
+(use-package doom-modeline
+  :straight t
+  :hook (after-init . doom-modeline-mode)
+  :custom
+  (doom-modeline-time-analogue-clock t)
+  )
 ;;(require 'init-crontab)
 ;;(require 'init-sly)
 ;;(custom-set-variable
@@ -898,6 +562,7 @@
 ;; If there is more than one, they won't work right.
 ;;(setq lsp-completion-enable-additional-text-edit nil)
 ;;)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -907,5 +572,6 @@
  '(tramp-default-host "172.104.241.26")
  '(tramp-default-method "rsync")
  '(tramp-default-user "sanakan")
- '(yas-snippet-dirs
-   '("/home/shoshin/.emacs.d/straight/build/yasnippet-snippets/snippets")))
+ ;;'(yas-snippet-dirs
+ ;;  '("/home/shoshin/.emacs.d/straight/build/yasnippet-snippets/snippets"))
+ )

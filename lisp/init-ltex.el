@@ -7,14 +7,14 @@
   :after lsp-mode
   :init
   (setq lsp-ltex-version "16.0.0")
-  :hook ((org-mode . lsp)
+  :hook (;;(org-mode . lsp)
          (text-mode  . lsp)
          (markdown-mode . lsp)
          (LaTeX-mode . lsp))
   :config
   (setq lsp-ltex-language "de-DE")
   (setq lsp-ltex-mother-tongue "de-DE")
-  (setq lsp-ltex-file-extension-whitelist '("org" "md" "tex"))
+  (setq lsp-ltex-file-extension-whitelist '("tex"))
   (setq lsp-ltex-disabled-rules '(["MORFOLOGIK_RULE_DE"]))
   (setq lsp-log-io t)
   )

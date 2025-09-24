@@ -4,7 +4,6 @@
 
 (use-package consult
   :straight t
-
   :custom
   (consult-preview-key nil)
   :general
