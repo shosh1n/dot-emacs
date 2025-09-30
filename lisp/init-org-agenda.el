@@ -3,7 +3,7 @@
 ;;; Code:
 (use-package org-super-agenda
               :straight t
-              ;;:after (org)
+              :after (org org-agenda)
               :config
               (with-eval-after-load 'org-agenda
                 (define-key org-agenda-mode-map (kbd "q") #'org-agenda-quit))

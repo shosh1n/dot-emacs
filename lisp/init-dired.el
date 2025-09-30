@@ -13,18 +13,21 @@
   :demand t
   :config
   (load (expand-file-name (concat user-emacs-directory "elisp/dired+/dired+")))
-  (with-eval-after-load 'dired
-    (require 'dired-x)
-    (require 'dired+)
-    (evil-define-key 'normal dired-mode-map (kbd "q") #'diredp-quit-window-kill)
-    (evil-define-key 'normal dired-mode-map (kbd "s") #'diredp-sort-arbitrary-command)
-        (setq dired-auto-revert-buffer 1
-          dired-dwim-target t
-          dired-listing-switches "-ahl --group-directories-first")
-    )
+  (require 'dired-x)
+  (require 'dired+)
+  (setq dired-auto-revert-buffer 1
+        dired-dwim-target t
+        dired-listing-switches "-ahl --group-directories-first")
+  ;; dired settings
   (add-hook 'dired-mode-hook
             (lambda ()
               (dired-omit-mode 1)))
+  ;;(add-hook 'dired-mode-hook
+          ;;(lambda ()
+          ;;  (evil-define-key 'normal dired-mode-map
+          ;;    "q" #'diredp-quit-window-kill
+          ;;    "s" #'diredp-sort-arbitrary-command))
+          ;;)
 
   )
 

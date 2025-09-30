@@ -4,12 +4,12 @@
 
 
 
-;;(use-package org-modern
-;;  :straight t
-;;  :after org
-;;  :config
-;;  (global-org-modern-mode -1)
-;;  )
+(use-package org-modern
+  :straight t
+  :after org
+  :config
+  (global-org-modern-mode 1)
+  )
 
 ;;(use-package org-modern-indent
 ;;  :straight (:package org-modern-indent
@@ -25,6 +25,7 @@
 (use-package engrave-faces
   :straight t
   )
+
 
 (use-package org
   :straight t
@@ -75,14 +76,14 @@
         '(
           ;; general selection
           ("g" "General To-Do"
-           entry (file+headline "~/org/agenda/todos.org" "General Tasks")
+           entry (file+headline "~/Dropbox/orgzly/todos.org" "General Tasks")
            "* TODO [#%^{Priority|A|B|C}] %^{Title} :%^{Tag|private|work|activity}:%^g\n:Created: %U\nSCHEDULED:%^{Scheduled to begin}t \n%?"
            :empty-lines 0)
           ("c" "Code To-Do"
-          entry (file+headline "~/org/todos.org" "Code Related Tasks")
+          entry (file+headline "~/Dropbox/orgzly/code.org" "Code Related Tasks")
           "* TODO [#B] %?\n:Created: %T\n%i\n%a\nProposed Solution: ")
           ("m" "Meeting"
-          entry (file+datetree "~/org/agenda/meetings.org")
+          entry (file+datetree "~/Dropbox/orgzly/meetings.org")
           "* %? :meeting:%^g \n:Created: %T\n** Attendees\n*** \n** Notes\n** Action Items\n*** TODO [#A] "
           :tree-type week
           :clock-in t
@@ -180,21 +181,37 @@
 ;;  (add-hook 'org-mode-hook #'valign-mode)
 ;;  )
 
-
-(use-package org-gcal
-  :straight t
-  :after org
-  :init
-  (setq org-gcal-fetch-file-alist '(("hermannschris@googlemail.com" . "~/org/dates.org")))
-  :config
-  (setq plstore-cache-passphrase-for-symmetric-encryption t)
-  )
 (use-package org-contrib
   :after (org)
   :straight t
   :init
   (require 'ox-extra)
-  (ox-extras-activate '(latex-header-blocks ignore-headlines)))
+  (ox-extras-activate '(latex-header-blocks ignore-headlines))
+  )
+;;(use-package oauth2
+;;  :straight t
+;; )
+;;(use-package org-gcal
+;;  :straight t
+;;  :after (org)
+;;  :init
+;;  :config
+;;  (require 'plstore)
+;;  (add-to-list 'plstore-encrypt-to '("488B0DAA0B420C3CEDC30F8308ADA8CDF127AC03"))
+;;  (setq org-gcal-fetch-file-alist '(("hermannschris@googlemail.com" . "~/Dropbox/cal/dates.org")))
+;;  (setq epg-pinentry-mode 'loopback)
+;;  )
+(use-package org-gcal
+  :after org
+  :demand t   ;; ensure it's loaded immediately, not deferred
+  :config
+  (require 'plstore)
+  (setq auth-sources '("~/.emacs.d/.authinfo.gpg"))
+  (setq epg-pinentry-mode 'loopback)
+ (add-to-list 'plstore-encrypt-to '("488B0DAA0B420C3CEDC30F8308ADA8CDF127AC03"))
+  (setq org-gcal-fetch-file-alist
+        '(("hermannschris@googlemail.com" . "~/Dropbox/cal/dates.org")))
+  )
 
 (provide 'init-org)
 ;;; init-org.el ends here

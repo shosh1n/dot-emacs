@@ -162,6 +162,7 @@
     ;"µ" 'evil-set-marker
   ;  )
 )
+(require 'init-evil-collection)
 
 
 (use-package nerd-icons
@@ -211,7 +212,8 @@
 (require 'exec-path-from-shell)
 (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG"))
   (add-to-list 'exec-path-from-shell-variables var))
-
+(setq auth-sources '("~/.emacs.d/.authinfo.gpg"))
+(setq epg-pinentry-mode 'loopback)
 (use-package which-key
     :straight t
     :diminish
@@ -396,14 +398,6 @@
 
 
 
-(use-package oauth2
-  :straight t
-  )
-
-
-
-
-
 (use-package cdlatex
   :ensure t
   :hook (LaTeX-mode . turn-on-cdlatex)
@@ -541,11 +535,13 @@
 
 ;; Array/tabular input with org-tables and cdlatex
 
+
 (require 'init-auctex)
 (require 'init-denote)
 (require 'init-graphviz)
 (require 'init-yasnippet)
-(require 'init-casual-suite)
+(require 'init-magit)
+;;(require 'init-casual-suite)
 (use-package doom-modeline
   :straight t
   :hook (after-init . doom-modeline-mode)
