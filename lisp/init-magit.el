@@ -8,7 +8,6 @@
   :init
   (setq forge-add-default-bindings nil)
   )
-)
 
 (provide 'init-magit)
 

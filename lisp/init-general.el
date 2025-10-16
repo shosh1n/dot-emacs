@@ -75,6 +75,14 @@
    ;; :keymaps '(override minibuffer-local-map insert-mode-map)
    ;; "M-p" 'completion-at-point
    ;; )
+;;(defun open-remote-file()
+;;  "open a remote file using tramp."
+;;  (interactive)
+;;  (find-file (concat "/ssh:sanakan@172.104.241.26:/" (read-string "Enter file path: ")))
+;;  (message "connecting to your server ...!"))
+;;
+;;   (evil-global-set-key 'normal (kbd "SPC o w") 'hc/open-work-folder)
+;;
    )
 
 

@@ -7,6 +7,7 @@
       user-login-name "shoshin"
       user-mail-address "christoph-alexander.hermanns@proton.me"
  )
+
 (setq warning-minimum-level :emergency)
 (setq gc-cons-threshold 100000000)
 (setq package-enable-at-startup nil)
@@ -311,54 +312,6 @@
 (setq visible-bell t)
 (setq x-stretch-cursor t)
 (add-to-list 'default-frame-alist '(alpha-background . 0.98))
-
-(require 'init-dabbrev)
-(require 'init-lsp)
-(require 'init-consult)
-(require 'init-corfu)
-(require 'init-cape)
-;;(require 'init-ltex)
-
-(use-package cmake-mode
-  :defer t
-  :straight (:build t))
-(use-package cmake-font-lock
-  :defer t
-  :after cmake-mode
-  :straight (:build t))
-
-
-
-(use-package modern-cpp-font-lock
-  :straight (:build t)
-  :defer t
-  :hook (c++-mode . modern-c++-font-lock-mode))
-
-
-;; show functionalities
-
-
-
-(use-package vertico-prescient
-  :straight t
-)
-
-
-(use-package emacs
-  :custom
-  (enable-recursive-minibuffers t)
-  (read-extended-command-predicate #'command-completion-default-include-p)
-  (minibuffer-prompt-properties
-   '(read-only t cursor-intangible t face minibuffer-prompt)))
-
-;;(use-package orderless
-;;  :straight t
-;;  :custom
-;;  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
-;;  (completion-styles '(orderless basic))
-;;  (completion-category-defaults nil)
-;;  (completion-category-overrides '((file (styles partial-completion)))))
-
 (use-package orderless
   :straight t
   :custom
@@ -395,6 +348,58 @@
    '(evil-goggles-delete-face ((t (:inherit 'shadow))))
    '(evil-goggles-paste-face ((t (:inherit 'lazy-highlight))))
    '(evil-goggles-yank-face ((t (:inherit 'isearch-fail))))))
+(use-package cmake-mode
+  :defer t
+  :straight (:build t))
+(use-package cmake-font-lock
+  :defer t
+  :after cmake-mode
+  :straight (:build t))
+
+
+
+(use-package modern-cpp-font-lock
+  :straight (:build t)
+  :defer t
+  :hook (c++-mode . modern-c++-font-lock-mode))
+
+
+;; show functionalities
+
+
+
+(use-package vertico-prescient
+  :straight t
+)
+
+
+(use-package emacs
+  :custom
+  (enable-recursive-minibuffers t)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  (minibuffer-prompt-properties
+   '(read-only t cursor-intangible t face minibuffer-prompt)))
+
+
+
+
+
+(require 'init-dabbrev)
+(require 'init-project)
+(require 'init-lsp)
+(require 'init-wgrep)
+(require 'init-corfu)
+(require 'init-glsl-mode)
+(require 'init-cape)
+;;(require 'init-ltex)
+
+;;(use-package orderless
+;;  :straight t
+;;  :custom
+;;  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
+;;  (completion-styles '(orderless basic))
+;;  (completion-category-defaults nil)
+;;  (completion-category-overrides '((file (styles partial-completion)))))
 
 
 
@@ -541,6 +546,9 @@
 (require 'init-graphviz)
 (require 'init-yasnippet)
 (require 'init-magit)
+(require 'init-hl-todo)
+(require 'init-consult)
+
 ;;(require 'init-casual-suite)
 (use-package doom-modeline
   :straight t
