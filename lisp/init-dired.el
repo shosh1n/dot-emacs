@@ -7,6 +7,16 @@
 ;;F find marked
 
 
+(defun my-orga ()
+  (interactive)
+  (hc/leader
+    :infix "a"
+    ""  '(nil :which-key "orga operational!")
+    "a" '("open job-application base " dired-find-file "`:/.babelrc.json'")
+    )
+  )
+
+
 (use-package dired
   :straight (:type built-in)
   :after(evil)
@@ -28,6 +38,8 @@
           ;;    "q" #'diredp-quit-window-kill
           ;;    "s" #'diredp-sort-arbitrary-command))
           ;;)
+
+
 
   )
 

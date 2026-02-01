@@ -7,7 +7,7 @@
       user-login-name "shoshin"
       user-mail-address "christoph-alexander.hermanns@proton.me"
  )
-
+;
 (setq warning-minimum-level :emergency)
 (setq gc-cons-threshold 100000000)
 (setq package-enable-at-startup nil)
@@ -134,35 +134,7 @@
    (require 'bind-key))
 (setq custom-safe-themes t)
 
-(straight-use-package '(evil :host github :repo "emacs-evil/evil"))
-(use-package evil
-  :init
-  (setq evil-want-integration t) ;; optional sincce it's already set to t by default
-  (setq evil-want-keybinding nil)
-  (setq evil-undo-system 'undo-fu)
-  :custom
-  (evil-insert-state-cursor '(bar "Green"))
-  (evil-visual-state-cursor '(box "White"))
-  (evil-normal-state-cursor '(box "Pink"))
-  (evil-want-minibuffer t)
-  :hook (after-init . evil-mode)
-  :config
-   (evil-mode 1)
-   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-  (setq evil-normal-state-modes
-        (append evil-emacs-state-modes
-        evil-insert-state-modes
-        evil-normal-state-modes
-        evil-motion-state-modes))
-  ;:general
-  ;(general-define-key
-  ;  :states 'normal
-  ; "M-n" 'evil-next-mark
-    ;"þ" 'evil-previous-mark
-    ;"µ" 'evil-set-marker
-  ;  )
-)
+(require 'init-evil)
 (require 'init-evil-collection)
 
 
@@ -391,7 +363,7 @@
 (require 'init-corfu)
 (require 'init-glsl-mode)
 (require 'init-cape)
-;;(require 'init-ltex)
+(require 'init-ltex)
 
 ;;(use-package orderless
 ;;  :straight t
@@ -548,6 +520,7 @@
 (require 'init-magit)
 (require 'init-hl-todo)
 (require 'init-consult)
+(require 'init-embark)
 
 ;;(require 'init-casual-suite)
 (use-package doom-modeline

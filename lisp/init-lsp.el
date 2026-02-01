@@ -68,6 +68,9 @@
   (lsp-ui-sideline-show-hover t)
   (lsp-ui-doc-enable t)
   )
+(use-package lsp-treemacs
+  :defer t
+  :straight (:build t))
 
 
 (provide 'init-lsp)

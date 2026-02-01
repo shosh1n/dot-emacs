@@ -6,23 +6,32 @@
   :straight t
   :custom
   (consult-preview-key 'any)
-  :general
-  (:states 'normal
-           (hc/leader
-             :infix "b"
-             ""  '(nil :which-key "buffer management")
-             "b" '("Show Consult Buffers" . consult-buffer)
-             "p" '("goto previous buffer". previous-buffer)
-             "n" '("goto next buffer"  . next-buffer)
-             )
+  (defvar consult--source-bookmark
+    `(:name     "Bookmark"
+      :narrow   ?m
+      :category bookmark
+      :face     consult-bookmark
+      :history  bookmark-history
+      :items    ,#'bookmark-all-names
+      :action   ,#'consult--bookmark-action))
+      :general
+      (:states 'normal
            (hc/leader
              :infix "c"
              ""  '(nil :which-key "consult ...")
              "y" '("store selection in register" . consult-register-store)
              "p" '("load slection from register" . consult-register)
              "c" '("lookup string"  . consult-ripgrep)
+             "l" '("lookup line"  . consult-line)
+             "f" '("focus lines" . consult-focus-lines)
+             "f" '("fd for files ... " . consult-fd)
+             "m" '("go to marked position" . consult-global-mark)
              )
-           )
+       )
+  (general-define-key
+   :keymaps 'evil-normal-state-map
+   [remap evil-paste-before] 'consult-yank-from-kill-ring
+   )
   :config
   (require 'keymap)
   (require 'cl-seq)
@@ -218,6 +227,57 @@
 ;;           consult--source-project-file))
 ;;
 )
+
+(use-package consult-dir
+  :straight t
+  :general
+  (hc/leader
+    :infix "b"
+    ""  '(nil :which-key "buffer management")
+    "d" '("Consult-Dir" . consult-dir)
+    "f" '("goto previous buffer" . consult-dir-jump-file)
+    "b" '("Show Consult Buffers" . consult-buffer)
+    "p" '("goto previous buffer". previous-buffer)
+    "n" '("goto next buffer"  . next-buffer)
+    )
+)
+;;(use-package consult-flyspell
+;;  :straight (consult-flyspell :type git :host gitlab :repo "OlMon/consult-flyspell" :branch "master")
+;;  :config
+;;  ;; default settings
+;;  (setq consult-flyspell-select-function nil
+;;        consult-flyspell-set-point-after-word t
+;;        consult-flyspell-always-check-buffer nil)
+;;)
+
+(use-package consult-eglot
+  :defer t
+  :after lsp
+  :straight (:build t)
+)
+(use-package consult-lsp
+  :defer t
+  :after lsp
+  :straight (:build t)
+)
+
+(use-package consult-org-roam
+   :ensure t
+   :after org-roam
+   :init
+   (require 'consult-org-roam)
+   ;; Activate the minor mode
+   (consult-org-roam-mode 1)
+   :custom
+   ;; Use `ripgrep' for searching with `consult-org-roam-search'
+   (consult-org-roam-grep-func #'consult-ripgrep)
+   ;; Configure a custom narrow key for `consult-buffer'
+   (consult-org-roam-buffer-narrow-key ?r)
+   ;; Display org-roam buffers right after non-org-roam buffers
+   ;; in consult-buffer (and not down at the bottom)
+   (consult-org-roam-buffer-after-buffers t)
+)
+
 (provide 'init-consult)
 
 ;;; init-consult.el ends here

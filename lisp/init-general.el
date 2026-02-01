@@ -2,6 +2,11 @@
 ;;; Commentary:
 ;;; Code:
 
+(defun my/orga ()
+  (interactive)
+  (find-file-existing "~/Documents/Applications/")
+  )
+
 (use-package general
   :straight (general :type git :host github :repo "noctuid/general.el")
   :demand t
@@ -48,6 +53,11 @@
    "m" '("describe mode!" . describe-mode)
    "c" '("describe command!" . describe-command)
    )
+   (hc/leader
+    :infix "a"
+    ""  '(nil :which-key "orga operational!")
+    "a" '("open job-application base " . my/orga)
+    )
 
    (general-define-key
     :states 'normal

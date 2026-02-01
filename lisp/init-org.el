@@ -155,6 +155,12 @@
     "a" '("agenda" . org-agenda)
     "l" '("org-store a link" . org-store-link)
     "c" '("capture some tasks..." . org-capture))
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-capture-mode-map
+   "RET" "C-c C-c")
+
+
 
 ;;  (setq org-agenda-category-icon-alist
 ;;      `(;;("work"       ,(list (all-the-icons-material "work" :height 0.9 :v-adjust -0.1)) nil nil :ascent center)

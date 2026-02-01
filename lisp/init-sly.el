@@ -1,4 +1,4 @@
-;;; init-sly.el  --- Working with sly -*- lexical-binding: t -*-
+;; init-sly.el  --- Working with sly -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
 
