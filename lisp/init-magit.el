@@ -7,6 +7,12 @@
   :defer t
   :init
   (setq forge-add-default-bindings nil)
+  :general
+  (hc/leader
+   :infix "g"
+   ""  '(nil :which-key "... magic/git!")
+   "g" '("menu " . magit)
+   )
   )
 
 (provide 'init-magit)

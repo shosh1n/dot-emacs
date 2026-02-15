@@ -81,7 +81,7 @@
   (lsp-ui-doc-enable t)
   (lsp-ui-doc-include-signature t)
   :config
-  (evil-global-et-key (kbd "C-d"))
+  (evil-global-unset-key (kbd "C-d"))
   :general
   (general-define-key
    :states 'insert
