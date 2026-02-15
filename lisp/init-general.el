@@ -7,6 +7,7 @@
   (find-file-existing "~/Documents/Applications/")
   )
 
+
 (use-package general
   :straight (general :type git :host github :repo "noctuid/general.el")
   :demand t
@@ -23,7 +24,10 @@
     :states '(normal insert visual emacs)
     :keymaps 'override
     )
-  (hc/leader
+  ;;(hc/leader-major
+  ;;  "." '("into eldoc" . eldoc-doc-buffer)
+  ;;  )
+    (hc/leader
    :infix "f"
    ""  '(nil :which-key "file operations")
    "f" '("find a file" . find-file)
@@ -31,7 +35,6 @@
    "d" '("📁 dired" . dired-jump)
    "p" '("my config.el" . goto-user-config)
    )
-
    (hc/leader
    :infix "SPC"
    "" '(nil :which-key "emacs stuff")
@@ -80,6 +83,9 @@
     :keymaps '(override minibuffer-local-map)
     "C-S-v" 'consult-yank-from-kill-ring
     )
+      ;;(general-define-key
+   ;; :states '(insert)
+   ;; "C-k" #'lsp-ui-doc-focus-frame)
    ;;(general-define-key
    ;; :states '(normal insert)
    ;; :keymaps '(override minibuffer-local-map insert-mode-map)

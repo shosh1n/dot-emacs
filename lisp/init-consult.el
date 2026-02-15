@@ -239,6 +239,9 @@
     "b" '("Show Consult Buffers" . consult-buffer)
     "p" '("goto previous buffer". previous-buffer)
     "n" '("goto next buffer"  . next-buffer)
+    "m" '("messages" . (lambda ()
+                         (interactive)
+                         (pop-to-buffer "*Messages*")))
     )
 )
 ;;(use-package consult-flyspell

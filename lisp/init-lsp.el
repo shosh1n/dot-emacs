@@ -38,16 +38,17 @@
 
 (use-package lsp-mode
   :straight t
-  :init
+  :defer t
   (setq-default lsp-clients-clangd-executable
         (seq-find #'executable-find lsp-clangd-executeable))
   ;; set prefix for lsp-command-keymap
   :hook ((python-mode . lsp)
-         (org-mode . lsp)
+         ;;(org-mode . lsp)
          (text-mode . lsp)
          (markdown-mode . lsp)
          (LaTeX-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration)
+         (lsp-mode . lsp-ui-mode)
          (c++-mode . lsp)
          (c-mode . lsp)
          (objc-mode . lsp)
@@ -55,6 +56,16 @@
   :custom
   (lsp-clients-clangd-args lsp-clangd-args)
   (setq lsp-cmake-server-command "/home/shoshin/miniconda3/bin/cmake-language-server /home/shoshin/.local/bin/cmake-language-server")
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all nil)
+  (lsp-idle-delay 0.6)
+  (lsp-inlay-hint-enable t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+  (lsp-rust-analyzer-display-closure-return-type-hints t)
+  (lsp-rust-analyzer-display-parameter-hints nil)
+  (lsp-rust-analyzer-display-reborrow-hints nil)
   )
 
 
@@ -63,15 +74,26 @@
   :commands lsp-ui-mode
   :hook (lsp-mode . lsp-ui-mode)
   :custom
+  (lsp-ui-peek-always-show t)
   (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-show-diagnostics t)
   (lsp-ui-sideline-show-hover t)
   (lsp-ui-doc-enable t)
+  (lsp-ui-doc-include-signature t)
+  :config
+  (evil-global-et-key (kbd "C-d"))
+  :general
+  (general-define-key
+   :states 'insert
+   :keymaps '(override lsp-ui-mode-map)
+   "C-d" (lambda()
+          "in lsp-mode runs lsp-signature-toggle-full-docs"
+          (interactive)
+          (lsp-signature-toggle-full-docs)))
   )
 (use-package lsp-treemacs
   :defer t
   :straight (:build t))
-
 
 (provide 'init-lsp)
 ;;; init-lsp.el ends here

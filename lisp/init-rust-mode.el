@@ -5,6 +5,7 @@
 (use-package rust-mode
   :straight t
   :init
+  (setq lsp-rust-analyzer-store-path "/home/shoshin/.cargo/bin/rust-analyzer")
   ;;(setq rust-mode-treesitter-derive t)
   :config
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))

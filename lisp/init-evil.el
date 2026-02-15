@@ -1,7 +1,6 @@
 ;;; init-evil.el --- Working with evil -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
-
 (use-package evil
   :straight (evil :type git :host github :repo "emacs-evil/evil")
   :init

@@ -133,10 +133,10 @@
    (require 'use-package)
    (require 'bind-key))
 (setq custom-safe-themes t)
-
+(require 'init-tokyonight-themes)
 (require 'init-evil)
 (require 'init-evil-collection)
-
+(require 'init-smartparens)
 
 (use-package nerd-icons
   :straight t
@@ -172,6 +172,7 @@
  '(which-key-description-face ((t (:foreground "red"))))
  '(which-key-key-face ((t (:foreground "#8be9fd" :weight bold))))
  '(which-key-separator-face ((t (:foreground "#50fa7b")))))
+
 
 (use-package exec-path-from-shell
   :straight t
@@ -223,7 +224,6 @@
 (require 'init-general)
 (require 'init-org)
 (require 'init-vertico)
-
 
 
 (use-package key-chord
@@ -358,12 +358,16 @@
 
 (require 'init-dabbrev)
 (require 'init-project)
+
 (require 'init-lsp)
+(require 'init-rustic)
+(require 'init-dap-mode)
 (require 'init-wgrep)
-(require 'init-corfu)
+(require 'init-company)
+;;(require 'init-corfu)
 (require 'init-glsl-mode)
-(require 'init-cape)
-(require 'init-ltex)
+;;(require 'init-cape)
+;;(require 'init-ltex)
 
 ;;(use-package orderless
 ;;  :straight t
@@ -457,6 +461,8 @@
       tab-width 4)
 (add-hook 'c-mode-hook
       (lambda () (setq-local indent-tabs-mode t)))
+
+
 ;;(add-hook 'lisp-mode-hook
 ;;	  (lambda () (setq-local indent-tabs-mode t)))
 

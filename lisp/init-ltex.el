@@ -21,16 +21,16 @@
 
 (defun my/lsp-ltex-set-documentKind ()
   (cond
-   ((derived-mode-p 'org-mode)
-    (setq-local lsp-ltex-documentKinds ["plaintext"]))
+   ((derived-mode-p 'tex-mode)
+   (setq-local lsp-ltex-documentKinds ["plaintext"]))
    ((derived-mode-p 'markdown-mode)
-    (setq-local lsp-ltex-documentKinds ["markdown"]))
+   (setq-local lsp-ltex-documentKinds ["markdown"]))
    ((derived-mode-p 'LaTeX-mode)
     (setq-local lsp-ltex-documentKinds ["latex"]))
    (t
     (setq-local lsp-ltex-documentKinds ["plaintext"]))))
 
-(add-hook 'lsp-mode-hook #'my/lsp-ltex-set-documentKind)
+;;(add-hook 'lsp-mode-hook #'my/lsp-ltex-set-documentKind)
 
 (provide 'init-ltex)
 

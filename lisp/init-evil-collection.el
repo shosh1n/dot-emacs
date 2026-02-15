@@ -6,8 +6,7 @@
   :after evil
   :straight t
   :config
-  (evil-collection-init '(calendar dired calc ediff dashboard bookmark magit)
-                        )
+  (evil-collection-init '(calendar dired calc ediff dashboard bookmark magit))
   )
 
 (provide 'init-evil-collection)
