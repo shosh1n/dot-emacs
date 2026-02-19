@@ -55,9 +55,9 @@
          )
   :custom
   (lsp-clients-clangd-args lsp-clangd-args)
-  (setq lsp-cmake-server-command "/home/shoshin/miniconda3/bin/cmake-language-server /home/shoshin/.local/bin/cmake-language-server")
+  (lsp-cmake-server-command "/home/shoshin/miniconda3/bin/cmake-language-server /home/shoshin/.local/bin/cmake-language-server")
   (lsp-rust-analyzer-cargo-watch-command "clippy")
-  (lsp-eldoc-render-all nil)
+  (lsp-eldoc-render-all t)
   (lsp-idle-delay 0.6)
   (lsp-inlay-hint-enable t)
   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
@@ -66,6 +66,8 @@
   (lsp-rust-analyzer-display-closure-return-type-hints t)
   (lsp-rust-analyzer-display-parameter-hints nil)
   (lsp-rust-analyzer-display-reborrow-hints nil)
+  (lsp-bash-highlight-parsing-errors t)
+  (lsp-enable-indentation nil)
   )
 
 
@@ -81,11 +83,11 @@
   (lsp-ui-doc-enable t)
   (lsp-ui-doc-include-signature t)
   :config
-  (evil-global-unset-key (kbd "C-d"))
+  (global-unset-key (kbd "C-d"))
   :general
   (general-define-key
    :states 'insert
-   :keymaps '(override lsp-ui-mode-map)
+   :keymaps '(lsp-ui-mode-map)
    "C-d" (lambda()
           "in lsp-mode runs lsp-signature-toggle-full-docs"
           (interactive)
@@ -93,7 +95,10 @@
   )
 (use-package lsp-treemacs
   :defer t
-  :straight (:build t))
+  :straight (:build t)
+  :config
+  (setq lsp-treemacs-sync-mode 1)
+  )
 
 (provide 'init-lsp)
 ;;; init-lsp.el ends here

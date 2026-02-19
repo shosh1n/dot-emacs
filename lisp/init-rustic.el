@@ -11,19 +11,23 @@
   (setq rustic-format-on-save t)
 
   :general
-  (hc/leader 'override
-    :infix "m"
-    ""  '(nil :which-key "rustic (for now - later mode dependant")
-    "m" '("c0DE: ui-menu" . lsp-ui-imenu)
-    "r" '("c0DE: find references" . lsp-find-references)
-    "f" '("c0DE: flycheck" . flycheck-list-errors)
-    "c" '("c0DE: auto-correct some erros" . lsp-execute-code-action)
-    "R" '("c0DE: RENAME" . lsp-rename)
-    "Q" '("c0DE: workspace-shutdown" . lsp-workspace-shutdown)
-    "q" '("c0DE: workspace-start" . lsp-workspace-restart)
-    "S" '("c0DE: status of rust analyzer" . lsp-rust-analyzer-status)
-    )
-
+  (hc/leader-major
+    :keymaps 'rustic-mode-map
+    :packages 'rustic
+    "b"  '(:ignore t :which-key "build")
+    "bb" #'rustic-cargo-build
+    "bB" #'rustic-cargo-bench
+    "bc" #'rustic-cargo-check
+    "bC" #'rustic-cargo-clippy
+    "bd" #'rustic-cargo-doc
+    "bf" #'rustic-cargo-fmt
+    "bn" #'rustic-cargo-new
+    "bo" #'rustic-cargo-outdated
+    "br" #'rustic-cargo-run
+    "t"  '(:ignore t :which-key "cargo test")
+    "ta" #'rustic-cargo-test
+    "ta" #'rustic-cargo-test
+   )
   )
 (provide 'init-rustic)
 ;;; init-rustic ends here

@@ -12,6 +12,9 @@
   :straight (general :type git :host github :repo "noctuid/general.el")
   :demand t
   :config
+ (general-create-definer hc/undefine
+    :keymaps 'override
+    :states '(normal emacs))
   (general-create-definer hc/leader
     ;; :prefix hc-key
     ;; it's my leader key which should be available everywhere!
@@ -20,7 +23,7 @@
     :keymaps 'override
     )
   (general-create-definer hc/leader-major
-    :prefix "S-SPC"
+    :prefix "s-SPC"
     :states '(normal insert visual emacs)
     :keymaps 'override
     )

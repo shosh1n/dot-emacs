@@ -48,7 +48,8 @@
     (let ((inhibit-read-only t))
       (delete-region (point-min) (point-max))
       (insert (string-trim (minibuffer-contents)))))
-  (abort-recursive-edit))
+  (abort-recursive-edit)
+  )
 
 (define-key minibuffer-local-map (kbd "C-g") #'my/minibuffer-quit-clean)
 (add-hook 'before-save-hook #'whitespace-cleanup)
@@ -320,24 +321,8 @@
    '(evil-goggles-delete-face ((t (:inherit 'shadow))))
    '(evil-goggles-paste-face ((t (:inherit 'lazy-highlight))))
    '(evil-goggles-yank-face ((t (:inherit 'isearch-fail))))))
-(use-package cmake-mode
-  :defer t
-  :straight (:build t))
-(use-package cmake-font-lock
-  :defer t
-  :after cmake-mode
-  :straight (:build t))
-
-
-
-(use-package modern-cpp-font-lock
-  :straight (:build t)
-  :defer t
-  :hook (c++-mode . modern-c++-font-lock-mode))
-
 
 ;; show functionalities
-
 
 
 (use-package vertico-prescient
@@ -366,6 +351,8 @@
 (require 'init-company)
 ;;(require 'init-corfu)
 (require 'init-glsl-mode)
+(require 'init-python)
+(require 'init-cpp-mode)
 ;;(require 'init-cape)
 ;;(require 'init-ltex)
 
@@ -527,7 +514,7 @@
 (require 'init-hl-todo)
 (require 'init-consult)
 (require 'init-embark)
-
+(require 'init-treemacs)
 ;;(require 'init-casual-suite)
 (use-package doom-modeline
   :straight t
