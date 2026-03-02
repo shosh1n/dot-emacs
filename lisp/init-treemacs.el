@@ -3,8 +3,7 @@
 ;;; Code:
 
 (use-package treemacs
-  :defer t
-  :straight (:build t)
+  :straight t
   :init
   (hc/leader
   :infix "t"

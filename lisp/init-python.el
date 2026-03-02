@@ -1,7 +1,6 @@
 ;;; init-python.el  --- Working with python -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
-
 (use-package python
   :defer t
   :straight (:build t)
@@ -16,6 +15,9 @@
   (when (and (executable-find "python3.14")
              (string= python-shell-interpreter "python"))
     (setq python-shell-interpreter "python3"))
+    (add-hook 'python-mode-hook (lambda ()
+                                  (require 'sphinx-doc)
+                                  (sphinx-doc-mode t)))
   :general
   (hc/leader-major
     :keymaps 'python-mode-map
@@ -34,7 +36,7 @@
   )
 
 (use-package pytest
-  :defet t
+  :defer t
   :straight (:build t)
   :commands (pytest-one
              pytest-pdb-one
@@ -190,7 +192,30 @@
   :custom (lsp-pyright-langserver-command "basedpyright")
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
-                          (lsp))))
+                          (lsp)))
+  :config
+  ;;(setq lsp-log-io t)
+  )
+
+;;(defun my/remote-python-eglot ()
+;;  "Configure eglot ONLY for remote Python files AFTER eglot loads."
+;;  (when (and (file-remote-p default-directory)
+;;             (featurep 'eglot))
+;;    (unless (assq 'python-mode eglot-server-programs)
+;;      (add-to-list 'eglot-server-programs
+;;                   '(python-mode
+;;                     . ("/home/hermanns/mambaforge/envs/cmt/bin/basedpyright-langserver" "--stdio"))))
+;;    (eglot-ensure)))
+;;
+;;(use-package eglot
+;;  :defer t
+;;  :straight (:build t)
+;;  :hook ((python-mode . my/remote-python-eglot)
+;;         (eglot-server-installed . eglot-ensure)
+;;         )
+;;  :config
+;;  ;;"an so on!"
+;;  )
 
 (provide 'init-python)
 

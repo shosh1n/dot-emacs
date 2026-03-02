@@ -226,6 +226,7 @@
 ;;           consult--source-project-buffer
 ;;           consult--source-project-file))
 ;;
+  (setq consult-fd-args "fd --color=never")
 )
 
 (use-package consult-dir
@@ -235,7 +236,6 @@
     :infix "b"
     ""  '(nil :which-key "buffer management")
     "d" '("Consult-Dir" . consult-dir)
-    "f" '("goto previous buffer" . consult-dir-jump-file)
     "b" '("Show Consult Buffers" . consult-buffer)
     "p" '("goto previous buffer". previous-buffer)
     "n" '("goto next buffer"  . next-buffer)
@@ -264,22 +264,22 @@
   :straight (:build t)
 )
 
-(use-package consult-org-roam
-   :ensure t
-   :after org-roam
-   :init
-   (require 'consult-org-roam)
-   ;; Activate the minor mode
-   (consult-org-roam-mode 1)
-   :custom
-   ;; Use `ripgrep' for searching with `consult-org-roam-search'
-   (consult-org-roam-grep-func #'consult-ripgrep)
-   ;; Configure a custom narrow key for `consult-buffer'
-   (consult-org-roam-buffer-narrow-key ?r)
-   ;; Display org-roam buffers right after non-org-roam buffers
-   ;; in consult-buffer (and not down at the bottom)
-   (consult-org-roam-buffer-after-buffers t)
-)
+;;(use-package consult-org-roam
+;;   :ensure t
+;;   :after org-roam
+;;   :init
+;;   (require 'consult-org-roam)
+;;   ;; Activate the minor mode
+;;   (consult-org-roam-mode 1)
+;;   :custom
+;;   ;; Use `ripgrep' for searching with `consult-org-roam-search'
+;;   (consult-org-roam-grep-func #'consult-ripgrep)
+;;   ;; Configure a custom narrow key for `consult-buffer'
+;;   (consult-org-roam-buffer-narrow-key ?r)
+;;   ;; Display org-roam buffers right after non-org-roam buffers
+;;   ;; in consult-buffer (and not down at the bottom)
+;;   (consult-org-roam-buffer-after-buffers t)
+;;)
 
 (provide 'init-consult)
 

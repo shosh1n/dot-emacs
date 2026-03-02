@@ -6,12 +6,9 @@
   :config
   (add-to-list 'tramp-remote-process-environment
              (format "DISPLAY=%s" (getenv "DISPLAY")))
-  (add-to-list 'tramp-default-user-alist
-               '("ssh" ".*\\.cherma\\.org'" "sanakan"))
   (custom-set-variables
    '(tramp-default-method "rsync")
-   '(tramp-default-user "sanakan")
-   '(tramp-default-host "172.104.241.26"))
+   '(tramp-default-host "172.24.129.14"))
   (setopt tramp-backup-directory-alist nil
           backup-inhibited t
           auto-save-default nil
@@ -29,13 +26,14 @@
   ;; (connection-local-set-profiles
   ;;  '(:application tramp :protocol "ssh")
   ;;  'remote-direct-async-process)
-  (add-to-list 'tramp-connection-properties (list "/ssh:" "direct-async" t))
+  (add-to-list 'tramp-connection-properties (list "/ssh:" "direct-async" t)
+               )
 
 
 
   (require 'tramp-sh)
   (setq tramp-remote-path (append tramp-remote-path
-                                  '(tramp-own-remote-path)))
+                                  '("/home/hermanns/.local/bin/" "/home/hermanns/mambaforge/bin")))
 )
 
 (provide 'init-tramp)
