@@ -226,6 +226,7 @@
 ;;           consult--source-project-buffer
 ;;           consult--source-project-file))
 ;;
+  (setq consult-fd-args "fd --color=never")
 )
 
 (use-package consult-dir

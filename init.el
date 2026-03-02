@@ -515,6 +515,7 @@
 (require 'init-consult)
 (require 'init-embark)
 (require 'init-treemacs)
+(require 'init-nix)
 ;;(require 'init-casual-suite)
 (use-package doom-modeline
   :straight t
