@@ -6,7 +6,31 @@
   (interactive)
   (find-file-existing "~/Documents/Applications/")
   )
+(defun si/open-bob-file()
+  (interactive)
+  (find-file (concat "/ssh:procs@172.16.8.201:/opt/sielaff" (read-string "Enter file path: ")))
+  (message "connecting to Burgoberbach ...!"))
+(defun si/open-lab193-file()
+  (interactive)
+  (find-file (concat "/ssh:procs@172.24.3.193:/opt/sielaff" (read-string "Enter file path: ")))
+  (message "connecting to Burgoberbach ...!"))
 
+(defun si/open-remote-file()
+  "open a remote file using tramp."
+  (interactive)
+  (find-file (concat "/ssh:hermanns@gpu:/home/hermanns" (read-string "Enter file path: ")))
+  (message "connecting to gpu-server ...!"))
+
+(defun hc/open-work-folder()
+  (interactive)
+  (dired "~/src/__workbench/__scratch")
+  (message  "%s to working directory!"
+            (nth (random 7) '(meandering walking hiking going pathing going Si-lining))))
+
+(defun hc/open-doc()
+  (interactive)
+  (dired "~/Dokumente/documentation/Bildverarbeiter/Organisatorisches.org")
+  (message  "%s open si-doc!"))
 
 (use-package general
   :straight (general :type git :host github :repo "noctuid/general.el")
@@ -86,6 +110,18 @@
     :keymaps '(override minibuffer-local-map)
     "C-S-v" 'consult-yank-from-kill-ring
     )
+   (hc/leader
+    :infix "l"
+     "w" 'hc/open-work-folder
+     "l" 'si/open-lab193-file
+     "g" 'si/open-remote-file
+     "o" 'si/open-bob-file
+     "s" 'hc/open-doc)
+
+
+
+
+
       ;;(general-define-key
    ;; :states '(insert)
    ;; "C-k" #'lsp-ui-doc-focus-frame)

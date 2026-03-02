@@ -4,8 +4,8 @@
 (setq user-emacs-directory "~/.emacs.d/")
 (setq user-full-name "Christoph-Alexander Hermanns"
       user-real-login-name "Christoph-Alexander Hermanns"
-      user-login-name "shoshin"
-      user-mail-address "christoph-alexander.hermanns@proton.me"
+      user-login-name "hc"
+      user-mail-address "c-a.hermanns@sielaff.de"
  )
 ;
 (setq warning-minimum-level :emergency)
@@ -187,7 +187,7 @@
 (require 'exec-path-from-shell)
 (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG"))
   (add-to-list 'exec-path-from-shell-variables var))
-(setq auth-sources '("~/.emacs.d/.authinfo.gpg"))
+;;(setq auth-sources '("~/.emacs.d/.authinfo.gpg"))
 (setq epg-pinentry-mode 'loopback)
 (use-package which-key
     :straight t
@@ -351,6 +351,7 @@
 (require 'init-company)
 ;;(require 'init-corfu)
 (require 'init-glsl-mode)
+(require 'init-sphinx)
 (require 'init-python)
 (require 'init-cpp-mode)
 ;;(require 'init-cape)
@@ -375,24 +376,24 @@
 (require 'init-org-roam)
 (require 'init-org-agenda)
 (require 'init-dashboard)
-(use-package org-ref
-  :straight t
-  (org-ref
-   :type git
-   :host github
-   :repo "jkitchin/org-ref"
-   :files ("*.el"))
-  :after org
-  :bind (bibtex-mode-map (kbd "c-c-b") 'org-ref-bibtex-hydra/body)
-  :config
-  (setq bibtex-autokey-year-length 4
-    bibtex-autokey-name-year-separator "-"
-    bibtex-autokey-year-title-separator "-"
-    bibtex-autokey-titleword-separator "-"
-    bibtex-autokey-titlewords 2
-    bibtex-autokey-titlewords-stretch 1
-    bibtex-autokey-titleword-length 5)
-  )
+;;(use-package org-ref
+;;  :straight t
+;;  (org-ref
+;;   :type git
+;;   :host github
+;;   :repo "jkitchin/org-ref"
+;;   :files ("*.el"))
+;;  :after org
+;;  :bind (bibtex-mode-map (kbd "c-c-b") 'org-ref-bibtex-hydra/body)
+;;  :config
+;;  (setq bibtex-autokey-year-length 4
+;;    bibtex-autokey-name-year-separator "-"
+;;    bibtex-autokey-year-title-separator "-"
+;;    bibtex-autokey-titleword-separator "-"
+;;    bibtex-autokey-titlewords 2
+;;    bibtex-autokey-titlewords-stretch 1
+;;    bibtex-autokey-titleword-length 5)
+;;  )
 (use-package avy
   :straight t
   :config
@@ -414,8 +415,7 @@
    :files (".el")))
 
 (use-package flycheck
-  :straight t (:build t)
-  :defer t
+  :straight t
   :init
   (global-flycheck-mode)
   :config
@@ -505,7 +505,6 @@
 
 ;; Array/tabular input with org-tables and cdlatex
 
-
 (require 'init-auctex)
 (require 'init-denote)
 (require 'init-graphviz)
@@ -540,9 +539,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(safe-local-variable-values '((git-commit-major-mode . git-commit-elisp-text-mode)))
- '(tramp-default-host "172.104.241.26")
- '(tramp-default-method "rsync")
- '(tramp-default-user "sanakan")
- ;;'(yas-snippet-dirs
- ;;  '("/home/shoshin/.emacs.d/straight/build/yasnippet-snippets/snippets"))
- )
+ '(tramp-default-method "rsync"))

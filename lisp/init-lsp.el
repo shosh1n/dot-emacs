@@ -36,16 +36,28 @@
   :type '(repeat string)
   )
 
+
+;;(defun setup-basedpyright-remote ()
+;;  "Register remote basedpyright client."
+;;  (lsp-register-client
+;;   (make-lsp-client
+;;    :new-connection (lsp-stdio-connection '("basedpyright-langserver" "--stdio"))
+;;    :major-modes '(python-mode)
+;;    :server-id 'basedpyright-remote
+;;    :priority 100
+;;    :remote? t)))
+
+
 (use-package lsp-mode
-  :straight t
-  :defer t
+  :defer t  ;; Keep this
+  :straight (lsp-mode :build t :type git :host github :repo "emacs-lsp/lsp-mode")
+  :init
   (setq-default lsp-clients-clangd-executable
         (seq-find #'executable-find lsp-clangd-executeable))
+  :config
+  ;;(setup-basedpyright-remote)
   ;; set prefix for lsp-command-keymap
   :hook ((python-mode . lsp)
-         ;;(org-mode . lsp)
-         (text-mode . lsp)
-         (markdown-mode . lsp)
          (LaTeX-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration)
          (lsp-mode . lsp-ui-mode)
@@ -54,6 +66,7 @@
          (objc-mode . lsp)
          )
   :custom
+  ;;(lsp-auto-register-remote-clients nil)
   (lsp-clients-clangd-args lsp-clangd-args)
   (lsp-cmake-server-command "/home/shoshin/miniconda3/bin/cmake-language-server /home/shoshin/.local/bin/cmake-language-server")
   (lsp-rust-analyzer-cargo-watch-command "clippy")
@@ -68,6 +81,7 @@
   (lsp-rust-analyzer-display-reborrow-hints nil)
   (lsp-bash-highlight-parsing-errors t)
   (lsp-enable-indentation nil)
+
   )
 
 
